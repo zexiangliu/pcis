@@ -18,7 +18,8 @@ function [ X0 ] = pre_proj(dyn, X, rho)
   end
 
   Xb = X - Polyhedron('A', [eye(dyn.nx); -eye(dyn.nx)], 'b', repmat(rho,2,1));
-
+  Xb.minHRep; % not sure it is necessary or not. 
+  
   X0_A = zeros(0, dyn.nx);
   X0_b = ones(0,1);
 
@@ -31,7 +32,7 @@ function [ X0 ] = pre_proj(dyn, X, rho)
   proj = cell(N_P * N_V, 1);
 
   % For each (p,v) combination
-  parfor iter=1:N_P*N_V
+  for iter=1:N_P*N_V
     ip = 1+mod(iter-1, N_P);    % idx p
     iv = 1+floor((iter-1)/N_P); % idx v
 
