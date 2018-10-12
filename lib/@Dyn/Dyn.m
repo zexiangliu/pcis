@@ -169,7 +169,16 @@ classdef Dyn
       if nargin < 3
         rho = 0;
       end
-      X0 = pre_proj(d, X, rho);
+      
+      if isa(X, 'PolyUnion')	
+		X0 = PolyUnion;
+        for i=1:X.Num
+          new_poly = pre_proj(d, X.Set(i), rho);
+          X0.add(new_poly);
+        end
+      else
+        X0 = pre_proj(d, X, rho);
+      end
     end
   end
 end
