@@ -17,6 +17,12 @@ function [ X0 ] = pre_proj(dyn, X, rho)
     rho = rho * ones(dyn.nx,1);
   end
 
+  % check if X is empty set
+  if(isEmptySet(X))
+      X0 = X;
+      return;
+  end
+  
   Xb = X - Polyhedron('A', [eye(dyn.nx); -eye(dyn.nx)], 'b', repmat(rho,2,1));
   Xb.minHRep; % not sure it is necessary or not. 
   
