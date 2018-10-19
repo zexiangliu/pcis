@@ -7,7 +7,9 @@ function C = stay_invariant( varargin )
 %   - C = stay_invariant(dyn, S, G, rho, debug_flag )
 %
 % Inputs:
-%   'debug'
+%   debug_flag: - "0" will produce no debugging information.
+%               - "1" will produce some textual debugging information
+%               - "2" will produce some figure-based/plots of debugging information
 
 %% Process Inputs
 
