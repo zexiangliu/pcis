@@ -24,7 +24,7 @@
 clear;close all;clc;
 
 % % choose lead car's intention model
-intent = 'annoying'; % 'cautious';
+intent = 'cautious' %'annoying'; % 'cautious';
 con = constants_tri;
 
 
@@ -42,7 +42,7 @@ switch intent
                  0      0       0       0;
                 -1      0       0       1;
                 0 -con.K2_cau con.K3_cau -con.K1_cau];
-        F = [0;0;0; con.K_cau1* con.vL_des];
+        F = [0;0;0; con.K1_cau* con.vL_des];
     otherwise
         error(['Unrecognized Intention provided: ' intent]);
 end
