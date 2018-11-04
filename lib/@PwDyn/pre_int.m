@@ -46,8 +46,8 @@ function [preSets] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id)
         end
         % reduce if too many polyhedron
         if(preSets.Num >= MaxNum)
-            preSet.reduce;
-            MaxNum = max(MaxNum,2*preSet.Num);
+            preSets.reduce;
+            MaxNum = max(MaxNum,2*preSets.Num);
         end
 	end
 
