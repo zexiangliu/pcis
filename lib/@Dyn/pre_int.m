@@ -91,7 +91,9 @@ function pre_proj = get_pre_proj(dyn,Xb,DV,PV,ip,iv)
         % For each w
         for iw=1:length(dyn.XW_V)
           wext_x = dyn.XW_V{iw}(:, 1:dyn.nx);
-          wext_p = dyn.XW_V{iv}(:, dyn.nx+1:dyn.nx+dyn.np);
+          % potential index issue here, need to be verified.
+%           wext_p = dyn.XW_V{iv}(:, dyn.nx+1:dyn.nx+dyn.np);
+          wext_p = dyn.XW_V{iw}(:, dyn.nx+1:dyn.nx+dyn.np);
           wext_w = dyn.XW_V{iw}(:, dyn.nx+dyn.np+1:end);
           Xd_A = [Xd_A; 
                   Xb.A*[A_mat_pd+dyn.Ew*wext_x dyn.B]];
