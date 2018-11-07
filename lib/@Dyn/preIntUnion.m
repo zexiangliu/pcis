@@ -1,4 +1,6 @@
 function X0 = preIntUnion(dyn1, dyn2, X, rho)
+% pre_int for the case that input is a PolyUnion.
+
 %     dyn1.check();
 %     dyn2.check();
     if nargin < 3
