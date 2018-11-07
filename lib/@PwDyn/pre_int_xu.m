@@ -12,7 +12,7 @@ function [preSets] = pre_int_xu(pwd1, pwd2, X, rho, regions, dyns_id, isParallel
 
 	%% Input Processing
 	
-    if(nargin <= 4)
+    if(nargin <= 4 || isempty(regions) || isempty(dyns_id))
         regions = cell(pwd1.num_region*pwd2.num_region,1);
         dyns_id = cell(pwd1.num_region*pwd2.num_region,1);
         num_reg = 0;
@@ -25,7 +25,8 @@ function [preSets] = pre_int_xu(pwd1, pwd2, X, rho, regions, dyns_id, isParallel
                     tmp_inter.minHRep;
                     % lift the rigion to X-U Space
                     tmp_inter = Polyhedron('H',[tmp_inter.A ...
-                                    zeros(pwd1.n,pwd1.m) tmp_inter.b]);
+                                    zeros(size(tmp_inter.A,1),pwd1.m)...
+                                    tmp_inter.b]);
                     regions{num_reg} = tmp_inter;
                     dyns_id{num_reg} = [i,j];
                 end

@@ -11,7 +11,7 @@ function [preSets] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParallel)
 
 	%% Input Processing
 	
-    if(nargin <= 4)
+    if(nargin <= 4 || isempty(regions) || isempty(dyns_id))
         regions = cell(pwd1.num_region*pwd2.num_region,1);
         dyns_id = cell(pwd1.num_region*pwd2.num_region,1);
         num_reg = 0;
