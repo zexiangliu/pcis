@@ -72,3 +72,19 @@ while(1)
     disp("iter_num: "+num2str(iter_num)+", cumul volume: "+num2str(vol));
 end
 profile viewer;
+
+
+
+
+
+%% Extract the range of valid inputs
+
+V_XU = pre_int_xu(dyn_a, dyn_c, V, rho, [], [], true);
+% randomly generate a state in V
+v = V.Set(1).V;
+
+alpha = rand(1,size(v,1));
+alpha = alpha/sum(alpha);
+
+u_range = V_XU.slice([1,2,3,4],(alpha*v(:,1:4))');
+plot(u_range)
