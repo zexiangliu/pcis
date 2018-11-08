@@ -27,26 +27,48 @@ function [preSets] = pre( varargin )
 					error(['Unrecognized input: ' varargin{ind} ])
 			end
 		end
-	end
+    end
 
+    if isa(X,'PolyUnion')
+        %If the target set is a polyUnion, then we need to do the pre for
+        %each element in its 'Sets'.
+        temp_preSets = cell(X.Num,1);
+        for ind_X = 1:X.Num
+            temp_preSets{ind_X} = pwd1.pre(X.Set(ind_X),rho);
+        end
+        %After all is said and done, combine the polyUnions.
+        all_sets = [];
+        for ind_X = 1:X.Num
+            for ind_tpS = 1:temp_preSets{ind_X}.Num
+                %In the future, we should perhaps clean up/be selective
+                %about what we keep.
+                all_sets = [ all_sets temp_preSets{ind_X}.Set(ind_tpS) ];
+            end
+        end 
+        preSets = PolyUnion(all_sets);
+        
+    elseif isa(X,'Polyhedron')
 
-	% eps0 = 0.01;
+        % eps0 = 0.01;
 
-	preSets = PolyUnion;
-	for i=1:pwd1.num_region
-	    new_poly = pwd1.reg_list{i}.intersect(pwd1.dyn_list{i}.pre_proj(X, rho));
-	    % S = add1(S, new_poly);
+        preSets = PolyUnion;
+        for i=1:pwd1.num_region
+            pre_from_dyn_i = pwd1.reg_list{i}.intersect(pwd1.dyn_list{i}.pre_proj(X, rho));
+            % S = add1(S, new_poly);
 
-	    if plot_flag
-		    figure;
-			hold on;
-			plot(pwd1.domain.projection([2 3]),'color','blue')
-			plot(X.projection([2 3]),'color','magenta')
-			plot(new_poly.projection([2 3]))
-			axis([-5 5 -5 5])
-		end
-		
-		preSets.add(new_poly);
-	end
+            if plot_flag
+                figure;
+                hold on;
+                plot(pwd1.domain.projection([2 3]),'color','blue')
+                plot(X.projection([2 3]),'color','magenta')
+                plot(pre_from_dyn_i.projection([2 3]))
+                axis([-5 5 -5 5])
+            end
+
+            preSets.add(pre_from_dyn_i);
+        end
+    else
+        error('Target set is not of type Polyhedron or PolyUnion.');
+    end
 
 end

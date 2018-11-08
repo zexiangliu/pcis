@@ -91,6 +91,9 @@ hold on;
 plot(j); plot(m,'color','blue')
 axis([-2.5 5.5 -2.5 7.5 ])
 
+% Testing function
+setMinus2(m,j);
+
 %Calculate set differences between m and each individual polyhedron in the union
 temp_set_diffs = {};
 
@@ -143,4 +146,9 @@ disp('Completed the set difference operation.')
 figure;
 plot(res_diff)
 axis([-2.5 5.5 -2.5 7.5 ])
+
+
+%% Testing Containment of One Polyhedral Set with another
+
+
 
