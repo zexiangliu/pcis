@@ -21,6 +21,7 @@ clear;close all;clc;
 con = constants_tri();
 % Get Dynamics
 [dyn_a , dyn_c] = get_takeover_pwd();
+con.h_max = 3000;
 
 %% Create Safe Set and Small Invariant Set
 
@@ -44,26 +45,24 @@ S = PolyUnion([X1 X2 X3]);
 % cinv set
 C = X2;
 
+max_iter = 7;
+
 % reach
-rhoPre = 1e-6;
-Xr = expand(dyn_c, S, C, rhoPre,'plot_stuff','debug','max_iter',10);
+rhoPre = 0; %1e-6;
+Xr = expand(dyn_c, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
 
 %% Plotting
 figure;
-for i = 1:length(Xr)
+for ind = 1:Xr.Num
     subplot(221);hold on
-    for ind_Xr_i = 1:Xr{i}.Num
-        plot(Xr{i}.Set(ind_Xr_i).slice([1 4], [25 25]));
-    end
+    plot(Xr.Set(ind).slice([1 4], [25 25]));
     set(gca,'Xdir','reverse','Ydir','reverse')
     axis([-1 5 -50 50]);
     xlabel('ye'); ylabel('h');
     title('vEgo = 25 m/s, vLead = 25 m/s')
 
     subplot(222);hold on
-    for ind_Xr_i = 1:Xr{i}.Num
-        plot(Xr{i}.Set(ind_Xr_i).slice([1 4], [30 20]));
-    end
+    plot(Xr.Set(ind).slice([1 4], [30 20]));
     %plot(Xr{i}(end).slice([1 4], [30 20]));
     set(gca,'Xdir','reverse','Ydir','reverse')
     axis([-1 5 -50 50]);
@@ -71,9 +70,7 @@ for i = 1:length(Xr)
     title('vEgo = 30 m/s, vLead = 20 m/s')
 
     subplot(223);hold on
-    for ind_Xr_i = 1:Xr{i}.Num
-        plot(Xr{i}.Set(ind_Xr_i).slice([1 4], [16 25]));
-    end
+    plot(Xr.Set(ind).slice([1 4], [16 25]));
     %plot(Xr{i}(end).slice([1 4], [16 25]));
     set(gca,'Xdir','reverse','Ydir','reverse')
     axis([-1 5 -50 50]);
@@ -81,9 +78,7 @@ for i = 1:length(Xr)
     title('vEgo = 16 m/s, vLead = 25 m/s')
 
     subplot(224);hold on
-    for ind_Xr_i = 1:Xr{i}.Num
-        plot(Xr{i}.Set(ind_Xr_i).slice([1 4], [25 0]));
-    end
+    plot(Xr.Set(ind).slice([1 4], [25 0]));
     %plot(Xr{i}(end).slice([1 4], [25 0]));
     set(gca,'Xdir','reverse','Ydir','reverse')
     axis([-1 5 -50 50]);

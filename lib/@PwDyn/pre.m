@@ -38,12 +38,8 @@ function [preSets] = pre( varargin )
         end
         %After all is said and done, combine the polyUnions.
         all_sets = [];
-        for ind_X = 1:X.Num
-            for ind_tpS = 1:temp_preSets{ind_X}.Num
-                %In the future, we should perhaps clean up/be selective
-                %about what we keep.
-                all_sets = [ all_sets temp_preSets{ind_X}.Set(ind_tpS) ];
-            end
+        for ind_X = 1:length(temp_preSets)
+            all_sets = [all_sets temp_preSets{ind_X}.Set ];
         end 
         preSets = PolyUnion(all_sets);
         
