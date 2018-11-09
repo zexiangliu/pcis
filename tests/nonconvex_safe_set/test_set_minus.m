@@ -92,7 +92,7 @@ plot(j); plot(m,'color','blue')
 axis([-2.5 5.5 -2.5 7.5 ])
 
 % Testing function
-setMinus2(m,j);
+setMinus3(m,j);
 
 %Calculate set differences between m and each individual polyhedron in the union
 temp_set_diffs = {};

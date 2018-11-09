@@ -31,7 +31,9 @@ function [ X0 ] = pre_int(dyn1, dyn2, X, rho)
   X0_b = ones(0,1);
 
   PV = dyn1.P.V;
-  DV = dyn1.D.V;
+  DV1 = dyn1.D.V;
+  DV2 = dyn2.D.V;
+
 
   N_P = max(1, size(PV,1));       % number of p vertices
   N_V = max(1, length(dyn1.XV_V)); % number of v vertices
@@ -43,8 +45,8 @@ function [ X0 ] = pre_int(dyn1, dyn2, X, rho)
     ip = 1+mod(iter-1, N_P);    % idx p
     iv = 1+floor((iter-1)/N_P); % idx v
 
-    pre_proj1 = get_pre_proj(dyn1,Xb,DV,PV,ip,iv);
-    pre_proj2 = get_pre_proj(dyn2,Xb,DV,PV,ip,iv);
+    pre_proj1 = get_pre_proj(dyn1,Xb,DV1,PV,ip,iv);
+    pre_proj2 = get_pre_proj(dyn2,Xb,DV2,PV,ip,iv);
     
     pre_proj = intersect(pre_proj1,pre_proj2);
     
