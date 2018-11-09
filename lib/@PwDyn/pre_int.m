@@ -50,7 +50,6 @@ function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParal
         isParallel = false;
     end
     
-	preSets = PolyUnion;
     MaxNum = 20;
     
     if(isParallel)
@@ -68,17 +67,19 @@ function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParal
         end
         
         new_poly = cell(num_reg,1);
-        if ifpreXu
+        if ifpreXU
             new_poly_xu = cell(num_reg,1);
+        else
+            new_poly_xu = cell(num_reg,1);
+            regions_xu = cell(num_reg,1);
         end
-        
         parfor i=1:num_reg
             dyn_id1 = dyns_id{i}(1);
             dyn_id2 = dyns_id{i}(2);
             P_inter = IntersectPolyUnion(P_xu1{dyn_id1},P_xu2{dyn_id2});
             new_poly{i} = IntersectPolyUnion(regions{i},...
                 projectionPolyUnion(P_inter,1:pwd1.n));
-            if ifpreXu
+            if ifpreXU
                 new_poly_xu{i} = IntersectPolyUnion(regions_xu{i},P_inter);
             end
         end

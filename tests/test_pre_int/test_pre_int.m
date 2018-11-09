@@ -5,6 +5,19 @@ clc; clear all; close all;
 addpath('get_dyn')
 con = constants_tri();
 
+%{
+  6×1 cell array
+
+    {'LCP'    }
+    {'CDD'    }
+    {'MOSEK'  }
+    {'GLPK'   }
+    {'LINPROG'}
+    {'SEDUMI' }
+%}
+
+mptopt('lpsolver', 'LCP', 'qpsolver', 'LCP');
+
 %% Parameters
 
 [dyn_a , dyn_c] = get_takeover_pwd();
@@ -31,11 +44,11 @@ Safe = PolyUnion([X1 X2 X3]);
 
 % cinv set
 V = PolyUnion(X2);
-rho = 0;
+rho = 1e-12;
 
 %% Set up Inside-out algorithm
 
-max_iter = 4;
+max_iter = 10;
 iter_num = 1;
 vol = volumePolyUnion(V);
 % vol_new = vol;
@@ -53,15 +66,22 @@ profile on;
 counter = 0;
 while(1)
     counter = counter + 1;
-    [pre_V,preXU] = pre_int(dyn_c, dyn_a, V, rho, regions, dyns_id, false);
+    
+    if(counter < max_iter)
+        [pre_V] = pre_int(dyn_c, dyn_a, V, rho, regions, dyns_id, false);
+    else
+        [pre_V,preXU] = pre_int(dyn_c, dyn_a, V, rho, regions, dyns_id,...
+            false);
+    end
+
     V_old = V;
-%     V = IntersectPolyUnion(Safe,pre_V);
-    tmp_V = IntersectPolyUnion(Safe,pre_V);
-    V = PolyUnion([V.Set,tmp_V.Set]);
+    V = IntersectPolyUnion(X3,pre_V);
+%     tmp_V = IntersectPolyUnion(X3,pre_V);
+%     V = PolyUnion([V.Set,tmp_V.Set]);
     V_saved = V;
     try
-        V.reduce();
-%         V.merge();
+%         V.reduce();
+        V.merge();
     catch
         V = V_saved;
         V.reduce();
