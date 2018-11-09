@@ -45,11 +45,11 @@ S = PolyUnion([X1 X2 X3]);
 % cinv set
 C = X2;
 
-max_iter = 9;
+max_iter = 7;
 
 % reach
 rhoPre = 0; %1e-6;
-Xr = expand(dyn_a, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
+Xr = expand(dyn_c, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
 
 %% Plotting
 figure;
