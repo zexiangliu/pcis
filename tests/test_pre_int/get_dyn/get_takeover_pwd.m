@@ -1,4 +1,4 @@
-function [ pwd_A , pwd_C ] = get_takeover_pwd( )
+function [ pwd_A , pwd_C ] = get_takeover_pwd2( )
 %get_takeover_pwd This function returns the 2 peicewise dynamics defined in
 %Yunus Sahin's document
 %[https://umich.box.com/s/mf77npzwp13jiifvg72ee126g0x3psqa].
@@ -31,14 +31,14 @@ Bw = B;
 
 %Region 1, for Annoying Driver
 A_r1 = [ zeros(3,4) ;
-         0 0 0 -1 ];
+         0 0 0 -1+con.f1*con.dt ];
 F_r1 = [zeros(3,1); con.vL_max];
 
 Bw_r1 = { Bw(:,1), Bw(:,2), zeros(n_x,1) };
 
 %Define Polyhedral domain as Hx * x <= h_x
-Hx_r1 = -(con.K_ann + [ 0 0 0 1 ]); 
-hx_r1 = -(con.vL_max - con.dLmax); 
+Hx_r1 = -(con.K_ann*con.dt + [ 0 0 0 1 ]); 
+hx_r1 = -(con.vL_max - con.dLmax*con.dt); 
 r1 = Polyhedron('A',Hx_r1,'b',hx_r1);
 
 %Region 2, for Annoying Driver
@@ -46,21 +46,21 @@ A_r2 = [zeros(3,4); con.K_ann*con.dt ];
 F_r2 = zeros(n_x,1);
 Bw_r2 = { Bw(:,1), Bw(:,2), [zeros(3,1); con.dt] };
 
-Hx_r2 = [   con.K_ann + [ 0 0 0 1 ] ;
-            -(con.K_ann + [ 0 0 0 1 ]) ];
-hx_r2 = [   con.vL_max - con.dLmax ;
-            con.vL_min + con.dLmin];
+Hx_r2 = [   con.K_ann*con.dt + [ 0 0 0 1 ] ;
+            -(con.K_ann*con.dt + [ 0 0 0 1 ]) ];
+hx_r2 = [   con.vL_max - con.dLmax*con.dt ;
+            -con.vL_min + con.dLmin*con.dt];
 r2 = Polyhedron('A',Hx_r2,'b',hx_r2);
 
 %Region 3, for Annoying Driver
 A_r3 = [ zeros(3,4) ;
-         0 0 0 -1 ];
+         0 0 0 -1+con.f1*con.dt ];
 F_r3 = [zeros(3,1); con.vL_min];
 
 Bw_r3 = {Bw(:,1), Bw(:,2), zeros(n_x,1)};
 
-Hx_r3 = con.K_ann + [ 0 0 0 1 ];
-hx_r3 = con.vL_min + con.dLmin;
+Hx_r3 = con.K_ann*con.dt + [ 0 0 0 1 ];
+hx_r3 = con.vL_min - con.dLmin*con.dt ;
 r3 = Polyhedron('A',Hx_r3,'b',hx_r3);
 
 %Create PwDyn Object
@@ -86,14 +86,14 @@ clear A_r1 A_r2 A_r3 B_r1 B_r2 B_r3 F_r1 F_r2 F_r3
 
 %Region 1, for Cautious Driver
 A_r1 = [ zeros(3,4) ;
-         0 0 0 -1 ];
+         0 0 0 -1+con.f1*con.dt ];
 F_r1 = [zeros(3,1); con.vL_max];
 
 Bw_r1 = { Bw(:,1),Bw(:,2), zeros(n_x,1) };
 
 %Define Polyhedral domain as Hx * x <= h_x
-Hx_r1 = -(con.K_cau + [ 0 0 0 1 ]); 
-hx_r1 = -(con.vL_max - con.dLmax); 
+Hx_r1 = -(con.K_cau*con.dt + [ 0 0 0 1 ]); 
+hx_r1 = -(con.vL_max - con.dLmax*con.dt); 
 r1 = Polyhedron('A',Hx_r1,'b',hx_r1);
 
 %Region 2, for Cautious Driver
@@ -102,21 +102,21 @@ A_r2 = [zeros(3,4); con.K_cau*con.dt ];
 F_r2 = [zeros(3,1);-con.K3_cau*con.vL_des*con.dt];
 Bw_r2 = { Bw(:,1), Bw(:,2), [zeros(3,1); con.dt] };
 
-Hx_r2 = [   con.K_cau + [ 0 0 0 1 ] ;
-            -(con.K_cau + [ 0 0 0 1 ]) ];
-hx_r2 = [   con.vL_max - con.dLmax ;
-            con.vL_min + con.dLmin];
+Hx_r2 = [   con.K_cau*con.dt + [ 0 0 0 1 ] ;
+            -(con.K_cau*con.dt + [ 0 0 0 1 ]) ];
+hx_r2 = [   con.vL_max - con.dLmax*con.dt ;
+            -con.vL_min + con.dLmin*con.dt];
 r2 = Polyhedron('A',Hx_r2,'b',hx_r2);
 
 %Region 3, for Cautious Driver
 A_r3 = [ zeros(3,4) ;
-         0 0 0 -1 ];
+         0 0 0 -1+con.f1*con.dt ];
 F_r3 = [zeros(3,1); con.vL_min];
 
 Bw_r3 = {Bw(:,1), Bw(:,2), zeros(n_x,1)};
 
-Hx_r3 = con.K_cau + [ 0 0 0 1 ];
-hx_r3 = con.vL_min + con.dLmin;
+Hx_r3 = con.K_cau*con.dt + [ 0 0 0 1 ];
+hx_r3 = con.vL_min - con.dLmin*con.dt;
 r3 = Polyhedron('A',Hx_r3,'b',hx_r3);
 
 
@@ -124,7 +124,7 @@ r3 = Polyhedron('A',Hx_r3,'b',hx_r3);
 dom = Polyhedron('lb',[con.v_min, con.y_min, -inf, con.vL_min ], ...
                  'ub',[con.v_max, con.y_max, inf, con.vL_max] );
 
-D = Polyhedron('lb',[con.dmin_ACC,con.dmin_LK,con.dLmin],'ub',[con.dmax_ACC,con.dmax_LK,con.dLmax]) %Feasible disturbances
+D = Polyhedron('lb',[con.dmin_ACC,con.dmin_LK,con.dLmin],'ub',[con.dmax_ACC,con.dmax_LK,con.dLmax]); %Feasible disturbances
 XU = Polyhedron('A',[zeros(n_u,n_x) eye(n_u) ; zeros(n_u,n_x) -eye(n_u) ], ...
                 'b',[con.umax_ACC ; con.umax_LK ; -con.umin_ACC ; -con.umin_LK ]);
 
