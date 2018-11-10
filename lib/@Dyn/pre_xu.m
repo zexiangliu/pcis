@@ -25,7 +25,9 @@ function [ pre_XU ] = pre_xu(dyn, X, rho)
   end
   
   Xb = X - Polyhedron('A', [eye(dyn.nx); -eye(dyn.nx)], 'b', repmat(rho,2,1));
-  Xb.minHRep; % not sure it is necessary or not. 
+  if(rho ~= 0)
+    Xb.minHRep; % not sure it is necessary or not. 
+  end
 
   DV = dyn.D.V;
 

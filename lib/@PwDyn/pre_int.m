@@ -50,7 +50,7 @@ function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParal
         isParallel = false;
     end
     
-    MaxNum = 20;
+    MaxNum = 30;
     
     if(isParallel)
         

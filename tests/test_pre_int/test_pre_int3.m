@@ -68,6 +68,8 @@ vol = volumePolyUnion(V);
 
 fig =figure;
 
+collector = [];
+
 % profile on;
 counter = 0;
 while(1)
@@ -81,10 +83,9 @@ while(1)
     end
     V_old = V;
 %     V = IntersectPolyUnion(X1,pre_V);
-    pre_V
     tmp_V = IntersectPolyUnion(X3,pre_V);
-    V = PolyUnion([V.Set,tmp_V.Set]);
-    V_saved = V
+    V = PolyUnion([V.Set,collector,tmp_V.Set]);
+    V_saved = V;
     try
         V.merge();
 %         V.reduce();
@@ -92,6 +93,17 @@ while(1)
         V = V_saved;
         V.reduce();
     end
+    new_V = [];
+    for i = 1:V.Num
+     if V.Set(i).volume<=200
+        collector = [collector V.Set(i)];
+     else
+        new_V = [new_V V.Set(i)];
+     end
+    end
+    
+    V = PolyUnion(new_V)
+    
     if(mod(counter,5)==0)
       V_old = IntersectPolyUnion(V_old, react_zone);
       vol = volumePolyUnion(setMinus3(...
