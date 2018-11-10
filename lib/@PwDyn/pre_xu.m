@@ -13,6 +13,7 @@ function [preXU] = pre_xu(pwd, X, rho)
     preXU = [];
     for i = 1:pwd.num_region
             tmp_P_xu = preUnion_xu(pwd.dyn_list{i},X,rho);
+            tmp_P_xu = IntersectPolyUnion(regions_xu{i},tmp_P_xu);
             preXU = [preXU tmp_P_xu.Set];
     end
     
