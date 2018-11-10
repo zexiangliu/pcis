@@ -1,4 +1,4 @@
-function [ pre_XU ] = pre_int_xu(dyn1, dyn2, X, rho)
+function [ pre_XU ] = pre_xu(dyn, X, rho)
   % Compute set
   % {x : ∀ p ∃ u ∀ d, x_1(t+1) + Ball(rho) ⊆ X or x_2(t+1) + Ball(rho) ⊆ X}
   % using normal intersection/projection method
@@ -6,7 +6,7 @@ function [ pre_XU ] = pre_int_xu(dyn1, dyn2, X, rho)
   %
   % Reference: Petter Nilsson Ph.D. thesis (2017), Theorem 3.4
 
-  if ~isa(dyn1, 'Dyn') || ~isa(dyn2, 'Dyn')
+  if ~isa(dyn, 'Dyn')
     error('dyn must be an instance of Dyn');
   end
 
@@ -15,23 +15,21 @@ function [ pre_XU ] = pre_int_xu(dyn1, dyn2, X, rho)
   end
 
   if length(rho) == 1
-    rho = rho * ones(dyn1.nx,1);
+    rho = rho * ones(dyn.nx,1);
   end
 
   % check if X is empty set
   if(isEmptySet(X))
-      X0 = X;
+      pre_XU = X;
       return;
   end
   
-  Xb = X - Polyhedron('A', [eye(dyn1.nx); -eye(dyn1.nx)], 'b', repmat(rho,2,1));
+  Xb = X - Polyhedron('A', [eye(dyn.nx); -eye(dyn.nx)], 'b', repmat(rho,2,1));
   Xb.minHRep; % not sure it is necessary or not. 
 
-  DV = dyn1.D.V;
+  DV = dyn.D.V;
 
-  pre_proj1 = get_pre_proj(dyn1,Xb,DV);
-  pre_proj2 = get_pre_proj(dyn2,Xb,DV);
-  pre_XU = intersect(pre_proj1,pre_proj2);
+  pre_XU = get_pre_proj(dyn,Xb,DV);
   pre_XU.minHRep;
 end
 
