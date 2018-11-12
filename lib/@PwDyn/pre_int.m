@@ -79,8 +79,8 @@ function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParal
         parfor i=1:num_reg
             dyn_id1 = dyns_id{i}(1);
             dyn_id2 = dyns_id{i}(2);
+            P_inter = IntersectPolyUnion(P_xu1{dyn_id1},P_xu2{dyn_id2});
             if ~isOnlyXU
-                P_inter = IntersectPolyUnion(P_xu1{dyn_id1},P_xu2{dyn_id2});
                 new_poly{i} = IntersectPolyUnion(regions{i},...
                     projectionPolyUnion(P_inter,1:pwd1.n));
             end
@@ -130,13 +130,16 @@ function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParal
             if ~isOnlyXU
                 new_poly = IntersectPolyUnion(regions{i},...
                     projectionPolyUnion(P_inter,1:pwd1.n));
-            
-                preSets = PolyUnion([preSets.Set new_poly.Set]);
+                if new_poly.Num > 0
+                    preSets = PolyUnion([preSets.Set new_poly.Set]);
+                end
             end
             
             if ifpreXU
                 new_poly_xu = IntersectPolyUnion(regions_xu{i},P_inter);
-                preXU = PolyUnion([preXU.Set new_poly_xu.Set]);
+                if new_poly_xu.Num > 0
+                    preXU = PolyUnion([preXU.Set new_poly_xu.Set]);
+                end
             end
 %             % reduce if too many polyhedron
 %             if(preSets.Num >= MaxNum)
