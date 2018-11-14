@@ -8,7 +8,7 @@ function [con] = constants_tri()
   % longitudinal
   con.f1 = 3/36;
   con.f2 = 3/33.5;
-  con.K_ann = [ 0 0 1 0 ];
+  con.K_ann = [ 1 0 0 -1 ];
   con.K_cau = [0 0.1 0.1 0.01];
   con.K1_cau = con.K_cau(2);
   con.K2_cau = con.K_cau(3);
@@ -17,8 +17,8 @@ function [con] = constants_tri()
   con.K_des = [ 0 0 0 1 ];
   % lateral
   con.y_min = -0.9;
-  con.y_max = 4.5;
-  con.y_lane = 3.6; % lane width
+  con.y_max = 2.7;
+%   con.y_lane = 3.6; % lane width
   
   % assumptions
   con.vL_min = 0;   % Lead car min velocity (m/s)
@@ -41,7 +41,7 @@ function [con] = constants_tri()
   con.dLmin = 0.05*con.aL_min;
     
   % specifications
-  con.h_min = 4;   % minimum distance behind/ahead of lead car
+  con.h_min = 10;   % minimum distance behind/ahead of lead car
   con.h_max = 300; % max distance behind/ahead of lead car (m)
   con.tau_min = 1.7; % minimum
   con.tau_des = 2.1;
