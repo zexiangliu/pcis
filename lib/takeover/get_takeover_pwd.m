@@ -1,4 +1,4 @@
-function [ pwd_A , pwd_C ] = get_takeover_pwd2( )
+function [ pwd_A , pwd_C ] = get_takeover_pwd( )
 %get_takeover_pwd This function returns the 2 peicewise dynamics defined in
 %Yunus Sahin's document
 %[https://umich.box.com/s/mf77npzwp13jiifvg72ee126g0x3psqa].
