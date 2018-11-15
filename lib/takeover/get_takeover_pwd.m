@@ -106,7 +106,7 @@ pwd_A = PwDyn(dom, { r1, r2, r3, r4, r5 } , ...
                   Dyn(A+A_r5, F_r5, B, XU , {} , {} , Polyhedron(), Ad, Bw_r5 , D )} );
 
              
-clear A_r1 A_r2 A_r3 A_r4 A_r5 B_r1 B_r2 B_r3 B_r4 B_r5 F_r1 F_r2 F_r3 F_r4 F_r5
+clear A_r1 A_r2 A_r3 A_r4 A_r5 Bw_r1 Bw_r2 Bw_r3 Bw_r4 Bw_r5 F_r1 F_r2 F_r3 F_r4 F_r5
 
 %% Matrix Modifications for the Cautious driver.
 
