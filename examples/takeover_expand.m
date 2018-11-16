@@ -36,7 +36,7 @@ dyn_opt = 5;
 
 %% Create Safe Set and Small Invariant Set
 
-h_max = 3000;
+h_max = Inf;
 vl_max = Inf;
 X1 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;      vl_max],...
                 'LB', [con.v_min;   con.y_min;      con.h_min;     -vl_max]);
