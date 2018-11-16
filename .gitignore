@@ -6,3 +6,4 @@
 *.tif
 *.eps
 tests/test_pre_int/achieve
+.DS_Store
