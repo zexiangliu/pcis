@@ -39,18 +39,21 @@ react_zone = Polyhedron('H', [0 0 1 0 con.h_max;
 % X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min;    Inf],...
 %                 'LB', [con.v_min;   con.y_min;      -con.h_max;    -Inf]);
 
-X1 = Polyhedron('UB', [con.v_max;   con.y_max;      Inf;      Inf],...
+h_max = inf;
+X1 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;      Inf],...
                 'LB', [con.v_min;   con.y_min;      con.h_min;     -Inf]);
-X2 = Polyhedron('UB', [con.v_max;   con.y_max;      Inf;     Inf],...
-                'LB', [con.v_min;   -con.y_min;     -Inf;    -Inf]);
+X2 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;     Inf],...
+                'LB', [con.v_min;   -con.y_min;     -h_max;    -Inf]);
 X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min;    Inf],...
-                'LB', [con.v_min;   con.y_min;      -Inf;    -Inf]);
+                'LB', [con.v_min;   con.y_min;      -h_max;    -Inf]);
 % Safe set 
 Safe = PolyUnion([X1 X3]);
 
 % cinv set
-V = PolyUnion(X2);
-rho = 1e-6;
+
+load seed.mat;
+V = C;
+rho = 0;
 
 %% Set up Inside-out algorithm
 
@@ -80,7 +83,7 @@ while(1)
     [pre_V] = pre_int(dyn_c, dyn_a, V, rho, regions, dyns_id, false);
     
     V_old = V;
-    V = IntersectPolyUnion(X1,pre_V);
+    V = IntersectPolyUnion(X3,pre_V);
 %     V = V_all;
     
     V_saved = V
