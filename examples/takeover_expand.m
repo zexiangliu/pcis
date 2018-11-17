@@ -28,7 +28,7 @@ mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
 
 %% Select Intention to Use for Invariant Set Growth
 
-dyn_opt = 5;
+dyn_opt = 1;
 % 1 = dyn_a: Aggressive or Annoying Piecewise Affine Dynamics
 % 2 = dyn_c: Cautious Piecewise Affine Dynamics
 % 3 = dyn_conservative: Affine Dynamics with 3 states and the assumption that lead vehicle can arbitrarily choose its velocity from a bounded set.

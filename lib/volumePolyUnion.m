@@ -1,6 +1,6 @@
 function volume = volumePolyUnion(V)
     volume = 0;
-    if isa(V,"Polyhedron")
+    if isa(V,'Polyhedron')
         volume = V.volume;
         return;
     end
