@@ -53,8 +53,8 @@ Hx_r2 = [   con.K_ann*con.dt + [ 0 0 0 1 ] ;
             [ zeros(2,3) [1;-1] ] ];
 hx_r2 = [   con.vL_max - con.dLmax*con.dt ;
             -con.vL_min + con.dLmin*con.dt;
-            con.h_max ;
-            con.h_max ];
+            con.h_reaction ;
+            con.h_reaction ];
 r2 = Polyhedron('A',Hx_r2,'b',hx_r2);
 
 %Region 3, for Annoying Driver
@@ -131,10 +131,14 @@ A_r2 = [zeros(3,4); con.K_cau*con.dt ];
 F_r2 = [zeros(3,1);-con.K3_cau*con.vL_des*con.dt];
 Bw_r2 = { Bw(:,1), Bw(:,2), [zeros(3,1); con.dt] };
 
-Hx_r2 = [   con.K_cau*con.dt + [ 0 0 0 1 ] ;
+Hx_r2 = [   con.K_cau*con.dt;
+            -con.K_cau*con.dt;
+            con.K_cau*con.dt + [ 0 0 0 1 ] ;
             -(con.K_cau*con.dt + [ 0 0 0 1 ]) ;
             [ zeros(2,3) [1;-1] ] ];
-hx_r2 = [   con.vL_max - con.dLmax*con.dt ;
+hx_r2 = [   con.aL_max;
+            -con.aL_min;
+            con.vL_max - con.dLmax*con.dt ;
             -con.vL_min + con.dLmin*con.dt;
             con.h_max;
             con.h_max];

@@ -20,6 +20,9 @@ for p1 = 1:P1.Num
         p1p2 = mldivide(P1.Set(p1), P2.Set(p2)); % p1\p2
         p1P2 = IntersectPolyUnion(p1P2, p1p2, 20);
     end
+    if ~isa(p1P2, 'PolyUnion')
+        p1P2 = PolyUnion(p1P2);
+    end
     if p1P2.Num >= 1
         P3.add(p1P2.Set);
     end
