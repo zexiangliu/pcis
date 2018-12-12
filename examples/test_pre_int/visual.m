@@ -5,7 +5,7 @@ else
     figure(fig);
 end
 
-r=30;
+r=50;
     
 subplot(221);hold on
     plot(V.slice([1 4], [25 25]));

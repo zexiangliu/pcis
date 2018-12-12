@@ -39,22 +39,25 @@ react_zone = Polyhedron('H', [0 0 1 0 con.h_max;
 % X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min;    Inf],...
 %                 'LB', [con.v_min;   con.y_min;      -con.h_max;    -Inf]);
 
-X1 = Polyhedron('UB', [con.v_max;   con.y_max;      Inf;      Inf],...
+h_max = inf;
+X1 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;      Inf],...
                 'LB', [con.v_min;   con.y_min;      con.h_min;     -Inf]);
-X2 = Polyhedron('UB', [con.v_max;   con.y_max;      Inf;     Inf],...
-                'LB', [con.v_min;   -con.y_min;     -Inf;    -Inf]);
+X2 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;     Inf],...
+                'LB', [con.v_min;   -con.y_min;     -h_max;    -Inf]);
 X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min;    Inf],...
-                'LB', [con.v_min;   con.y_min;      -Inf;    -Inf]);
+                'LB', [con.v_min;   con.y_min;      -h_max;    -Inf]);
 % Safe set 
-Safe = PolyUnion([X1 X2 X3]);
+Safe = PolyUnion([X1 X3]);
 
 % cinv set
-V = PolyUnion(X2);
-rho = 0;%1e-10;
+
+load seed.mat;
+V = C;
+rho = 0;
 
 %% Set up Inside-out algorithm
 
-max_iter = 20;
+max_iter = 6;
 iter_num = 1;
 vol = volumePolyUnion(V);
 % vol_new = vol;
@@ -68,38 +71,52 @@ vol = volumePolyUnion(V);
 
 fig =figure;
 
+collector = [];
+
+V_all = PolyUnion(V.Set);
+
 % profile on;
 counter = 0;
 while(1)
     counter = counter + 1;
     
-    if(counter < max_iter)
-        [pre_V] = pre_int(dyn_c, dyn_a, V, rho, regions, dyns_id, false);
-    else
-        [pre_V,preXU] = pre_int(dyn_c, dyn_a, V, rho, regions, dyns_id,...
-            false);
-    end
+    [pre_V] = pre_int(dyn_c, dyn_a, V, rho, regions, dyns_id, false);
+    
     V_old = V;
-%     V = IntersectPolyUnion(X1,pre_V);
-    pre_V
-    tmp_V = IntersectPolyUnion(X3,pre_V);
-    V = PolyUnion([V.Set,tmp_V.Set]);
+    V = IntersectPolyUnion(X3,pre_V);
+%     V = V_all;
+    
     V_saved = V
+    
+    visual(V,fig);
+%     V = PolyUnion([collector, V.Set]);
     try
-        V.merge();
+        V.merge()
 %         V.reduce();
     catch
         V = V_saved;
-        V.reduce();
-    end
-    if(mod(counter,5)==0)
-      V_old = IntersectPolyUnion(V_old, react_zone);
-      vol = volumePolyUnion(setMinus3(...
-          IntersectPolyUnion(V,react_zone),V_old));
+%         V.reduce();
     end
     
+    V_all = PolyUnion([V_all.Set,V.Set]);
+%     new_V = [];
+%     for i = 1:V.Num
+%     if V.Set(i).volume<=2000
+%         collector = [collector V.Set(i)];
+%      else
+%         new_V = [new_V V.Set(i)];
+%      end
+%     end    
+%     V = PolyUnion(new_V)
+    
+    
+%     if(mod(counter,5)==0)
+%       V_old = IntersectPolyUnion(V_old, react_zone);
+%       vol = volumePolyUnion(setMinus3(...
+%           IntersectPolyUnion(V,react_zone),V_old));
+%     end
+%     
 %     fig = figure;
-    visual(V,fig);
 %     ylim([-30 30])
     if(vol == 0 || iter_num >= max_iter)
         break;

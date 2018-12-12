@@ -59,6 +59,7 @@ axis([ -5 5 -5 5])
 %Intersect Pre should be known, but let's make sure that it is being
 %correctly found.
 
+R = PolyUnion(R);
 pre_isx1 = pre_int(pwd1, pwd2, R, rho);
 pre_isx2 = pre_int(pwd3, pwd4, R, rho);
 

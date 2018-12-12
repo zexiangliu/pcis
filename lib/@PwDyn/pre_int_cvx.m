@@ -1,4 +1,4 @@
-function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParallel, isOnlyXU)
+function [preSets,preXU] = pre_int_cvx(pwd1, pwd2, X, rho, regions, dyns_id, isParallel,isOnlyXU)
 
 	% Usage:
 	%	preSets = pre_int(pwd1 , pwd2, X , rho)
@@ -45,7 +45,6 @@ function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParal
         end
     end
 
-    
     if(nargin <= 6)
         isParallel = false;
         isOnlyXU = false;
@@ -59,12 +58,12 @@ function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParal
         
         P_xu1 = cell(pwd1.num_region,1);
         P_xu2 = cell(pwd2.num_region,1);
-        for i = 1:pwd1.num_region
+        parfor i = 1:pwd1.num_region
             tmp_P_xu = preUnion_xu(pwd1.dyn_list{i},X,rho);
             P_xu1{i} = tmp_P_xu;
         end
         
-        for i = 1:pwd2.num_region
+        parfor i = 1:pwd2.num_region
             tmp_P_xu = preUnion_xu(pwd2.dyn_list{i},X,rho);
             P_xu2{i} = tmp_P_xu;
         end
@@ -110,12 +109,12 @@ function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParal
         P_xu1 = cell(pwd1.num_region,1);
         P_xu2 = cell(pwd2.num_region,1);
         for i = 1:pwd1.num_region
-            tmp_P_xu = preUnion_xu(pwd1.dyn_list{i},X,rho);
+            tmp_P_xu = merge_cvx(preUnion_xu(pwd1.dyn_list{i},X,rho));
             P_xu1{i} = tmp_P_xu;
         end
         
         for i = 1:pwd2.num_region
-            tmp_P_xu = preUnion_xu(pwd2.dyn_list{i},X,rho);
+            tmp_P_xu = merge_cvx(preUnion_xu(pwd2.dyn_list{i},X,rho));
             P_xu2{i} = tmp_P_xu;
         end
         
@@ -126,17 +125,22 @@ function [preSets,preXU] = pre_int(pwd1, pwd2, X, rho, regions, dyns_id, isParal
             disp(i);
             dyn_id1 = dyns_id{i}(1);
             dyn_id2 = dyns_id{i}(2);
-            P_inter = IntersectPolyUnion(P_xu1{dyn_id1},P_xu2{dyn_id2});
+            P_inter = merge_cvx(IntersectPolyUnion(P_xu1{dyn_id1},P_xu2{dyn_id2}));
+            
             if ~isOnlyXU
                 new_poly = IntersectPolyUnion(regions{i},...
-                    projectionPolyUnion(P_inter,1:pwd1.n));
+                    merge_cvx(projectionPolyUnion(P_inter,1:pwd1.n)));
+                
                 if new_poly.Num > 0
+                    new_poly = merge_cvx(new_poly);
                     preSets = PolyUnion([preSets.Set new_poly.Set]);
                 end
             end
-            
+
+                        
             if ifpreXU
                 new_poly_xu = IntersectPolyUnion(regions_xu{i},P_inter);
+                new_poly_xu = merge_cvx(new_poly_xu);
                 if new_poly_xu.Num > 0
                     preXU = PolyUnion([preXU.Set new_poly_xu.Set]);
                 end

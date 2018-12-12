@@ -27,7 +27,7 @@ rhoPre = varargin{4};
 %Assign defaults to the extra variables.
 plot_stuff = false;
 debug_flag = false;
-max_iter = -1;
+max_iter = Inf;
 
 arg_ind = 5;
 while arg_ind <= nargin
@@ -72,16 +72,14 @@ while(1)
     V = PolyUnion([V.Set,tmp_V.Set]);    
     V_saved = V;
     try
-        V.reduce();
-        %V.merge();
+        V.merge();
     catch
         V = V_saved;
         V.reduce();
     end
     if(mod(counter,10)==0)
-      V_old = IntersectPolyUnion(V_old, react_zone);
-      vol = volumePolyUnion(setMinus(...
-          IntersectPolyUnion(V,react_zone),V_old));
+      difference = setMinus3(V,V_old);      
+      vol = volumePolyUnion(difference.convexHull)
     end
     
 %     fig = figure;
@@ -101,4 +99,3 @@ while(1)
     iter_num = iter_num + 1;
 
 end
-        

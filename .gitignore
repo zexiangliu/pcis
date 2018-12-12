@@ -1,3 +1,9 @@
 *.m~
 *.mat
+*.svg
+*.png
+*.zip
+*.tif
+*.eps
+tests/test_pre_int/achieve
 .DS_Store

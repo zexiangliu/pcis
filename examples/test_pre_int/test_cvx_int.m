@@ -10,6 +10,7 @@ con = constants_tri();
 
 con.h_max = 3000;
 %% Create Safe Set and Small Invariant Set
+con.h_max = 3000;
 
 X1 = Polyhedron('UB', [con.v_max;   con.y_max;      con.h_max;      Inf],...
                 'LB', [con.v_min;   con.y_min;      con.h_min;     -Inf]);
@@ -19,11 +20,11 @@ X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min;    Inf],...
                 'LB', [con.v_min;   con.y_min;      -con.h_max;    -Inf]);
 
 % Safe set 
-Safe = PolyUnion([X1 X2 X3]);
+Safe = PolyUnion([X1 X3]);
 
 % cinv set
 V = PolyUnion(X2);
-rho = 0;
+rho = 1e-6;
 
 %% Set up Inside-out algorithm
 
@@ -39,12 +40,13 @@ while(1)
     counter = counter + 1;
     pre_V = pre(dyn_c, V, rho);
     V_old = V;
-    tmp_V = IntersectPolyUnion(Safe,pre_V);
-    V = PolyUnion([V.Set,tmp_V.Set]);    
-    V_saved = V;
+    V = IntersectPolyUnion(Safe,pre_V);
+%     tmp_V = IntersectPolyUnion(Safe,pre_V);
+%     V = PolyUnion([V.Set,tmp_V.Set]);    
+    V_saved = V
     try
-        V.reduce();
-        %V.merge();
+%         V.reduce();
+        V.merge();
     catch
         V = V_saved;
         V.reduce();

@@ -23,10 +23,12 @@ con = constants_tri();
 [dyn_a , dyn_c] = get_takeover_pwd();
 [dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
 dyn_conserv = get_dyn_bdd_vel();
+[dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
+mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
 
 %% Select Intention to Use for Invariant Set Growth
 
-dyn_opt = 4;
+dyn_opt = 1;
 % 1 = dyn_a: Aggressive or Annoying Piecewise Affine Dynamics
 % 2 = dyn_c: Cautious Piecewise Affine Dynamics
 % 3 = dyn_conservative: Affine Dynamics with 3 states and the assumption that lead vehicle can arbitrarily choose its velocity from a bounded set.
@@ -34,12 +36,14 @@ dyn_opt = 4;
 
 %% Create Safe Set and Small Invariant Set
 
-X1 = Polyhedron('UB', [con.v_max;   con.y_max;      Inf;      Inf],...
-                'LB', [con.v_min;   con.y_min;      con.h_min;     -Inf]);
-X2 = Polyhedron('UB', [con.v_max;   con.y_max;      Inf;     Inf],...
-                'LB', [con.v_min;   -con.y_min;     -Inf;    -Inf]);
-X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min;    Inf],...
-                'LB', [con.v_min;   con.y_min;      -Inf;    -Inf]);
+h_max = Inf;
+vl_max = Inf;
+X1 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;      vl_max],...
+                'LB', [con.v_min;   con.y_min;      con.h_min;     -vl_max]);
+X2 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;     vl_max],...
+                'LB', [con.v_min;   -con.y_min;     -h_max;    -vl_max]);
+X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min;    vl_max],...
+                'LB', [con.v_min;   con.y_min;      -h_max;    -vl_max]);
 
 % Safe set 
 S = PolyUnion([X1 X2 X3]); 
@@ -75,9 +79,15 @@ switch dyn_opt
 
         Xr = dyn_conserv.stay_invariant(S, C, rhoPre, 1 );
     case 4
-        C = PolyUnion( [Polyhedron('lb',[con.v_min 0 -con.h_min -Inf],'ub',[con.v_max, 0, con.h_min, Inf])] );
+        C = PolyUnion( [Polyhedron('lb',[con.v_min -Inf -3000 -Inf],'ub',[con.v_max, -0.9, 3000, Inf])] );
         S = PolyUnion([Polyhedron('lb',-Inf(1,4), 'ub',Inf(1,4) )]);
         Xr = dyn_a_dual.expand(S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
+    case 5
+        seed = load("seed.mat");
+        C = seed.C;
+        Xr = expand(dyn_a, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
+    case 6 
+        Xr = expand(dyn_a_nn, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
     otherwise
         error(['Unrecognized dyn_opt value: ' num2str(dyn_opt) ])
 end
@@ -159,3 +169,4 @@ else
     error(['The resulting Xr has an unexpected dimension: ' num2str(Xr.Dim) ])
 end
 
+    
