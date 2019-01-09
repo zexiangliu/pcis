@@ -36,12 +36,13 @@ Bw = B;
 %Region in "front of the car". Constraint is implicit.
 
 A_r1 = zeros(n_x);
+A_r1(4,:) = -A(4,:);
 F_r1 = zeros(n_x,1);
 
 Bw_r1 = { Bw(:,1), Bw(:,2), zeros(n_x,1) };
 
 %Define Polyhedral domain as Hx * x <= h_x
-Hx_r1 = [ -(con.K_ann*con.dt + [ 0 0 0 1 ]) ]; 
+Hx_r1 = [ -(con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ]) ]; 
 hx_r1 = [-(con.vL_max - con.dLmax*con.dt)];
 r1 = Polyhedron('A',Hx_r1,'b',hx_r1);
 
@@ -56,24 +57,26 @@ XW_V_r1 = { (1/con.dt)*[zeros(1,3),-1,con.vL_min],(1/con.dt)*[zeros(1,3),-1,con.
 % - the feedback can saturate the lower bound on ACCELERATION bound.
 
 A_r2 = zeros(n_x);
+A_r2(4,:) = con.K_ann*con.dt;
+
 F_r2 = zeros(n_x,1);
 Bw_r2 = { Bw(:,1), Bw(:,2), zeros(n_x,1) };
 
-Hx_r2 = [   con.K_ann*con.dt + [ 0 0 0 1 ] ;
-            -(con.K_ann*con.dt + [ 0 0 0 1 ]) ;
-            [ zeros(2,3) [1;-1] ] ;
+Hx_r2 = [   con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ] ;
+            -(con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ]) ;
+            [ zeros(2,2) [1;-1] zeros(2,1) ] ;
             con.K_ann ;
             con.K_ann ];
 hx_r2 = [   con.vL_max - con.dLmax*con.dt ;
             -con.vL_min + con.dLmin*con.dt;
-            con.h_max ;
-            con.h_max ;
+            con.h_reaction ;
+            -con.h_reaction ;
             con.aL_min - con.dLmin;
             con.aL_max - con.dLmax];
 r2 = Polyhedron('A',Hx_r2,'b',hx_r2);
 
 %Create State Dependent Disturbance
-Ew_r2 = Ew_r1;
+Ew_r2 = [zeros(3,1);con.dt];
 XW_V_r2 = { [zeros(1,4),con.aL_min],[con.K_ann,con.dLmax] };
 
 %=============================
@@ -82,25 +85,27 @@ XW_V_r2 = { [zeros(1,4),con.aL_min],[con.K_ann,con.dLmax] };
 % - the feedback is not saturating the VELOCITY bound.
 % - the feedback can saturate the upper bound on ACCELERATION bound.
 
-A_r3 =zeros(4);
+A_r3 = zeros(4);
+A_r3(4,:) = con.K_ann*con.dt;
+
 F_r3 = zeros(n_x,1);
 Bw_r3 = {Bw(:,1), Bw(:,2), zeros(n_x,1)};
 
-Hx_r3 = [ con.K_ann*con.dt + [ 0 0 0 1 ] ;
-          -(con.K_ann*con.dt + [ 0 0 0 1 ]) ;
-          [ zeros(2,3) [1;-1] ] ;
+Hx_r3 = [ con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ] ;
+          -(con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ]) ;
+          [ zeros(2,2) [1;-1] zeros(2,1) ] ;
           -con.K_ann ;
           -con.K_ann ];
 hx_r3 = [ con.vL_max - con.dLmax*con.dt ;
           -con.vL_min + con.dLmin*con.dt;
-          con.h_max ;
-          con.h_max ;
+          con.h_reaction ;
+          -con.h_reaction ;
           -(con.aL_min - con.dLmin);
           -(con.aL_max - con.dLmax)];
 r3 = Polyhedron('A',Hx_r3,'b',hx_r3);
 
 %Create State Dependent
-Ew_r3 = Ew_r1;
+Ew_r3 = Ew_r2;
 XW_V_r3 = { [con.K_ann,con.dLmin],[zeros(1,4),con.aL_max] };
 
 %==========================================================
@@ -110,18 +115,20 @@ XW_V_r3 = { [con.K_ann,con.dLmin],[zeros(1,4),con.aL_max] };
 % - the feedback is not saturating the ACCELERATION bound.
 
 A_r4 = zeros(n_x);
-F_r4 = [ zeros(3,1) ; -con.K_des*[0; 0;0;con.vL_des] ];
-Bw_r4 = {Bw(:,1), Bw(:,2), zeros(n_x,1)};
+A_r4(4,:) = con.K_ann*con.dt;
 
-Hx_r4 = [ con.K_ann*con.dt + [ 0 0 0 1 ] ;
-          -(con.K_ann*con.dt + [ 0 0 0 1 ]) ;
-          [ zeros(2,3) [1;-1] ] ;
+F_r4 = [ zeros(3,1) ; -con.K_des*[0; 0;0;con.vL_des] ];
+Bw_r4 = {Bw(:,1), Bw(:,2), [0;0;0;con.dt]};
+
+Hx_r4 = [ con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ] ;
+          -(con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ]) ;
+          [ zeros(2,2) [1;-1] zeros(2,1) ] ;
           -con.K_ann ;
           con.K_ann];
 hx_r4 = [ con.vL_max - con.dLmax*con.dt ;
           -con.vL_min + con.dLmin*con.dt;
-          con.h_max ;
-          con.h_max ;
+          con.h_reaction ;
+          -con.h_reaction ;
           -(con.aL_min - con.dLmin);
           con.aL_max - con.dLmax];
 r4 = Polyhedron('A',Hx_r4,'b',hx_r4);
@@ -133,9 +140,11 @@ r4 = Polyhedron('A',Hx_r4,'b',hx_r4);
 %, so its velocity can change arbitrarily in the feasible domain.
 %Region in "front of the car". Constraint is implicit.
 
-A_r5 = A_r4;
-F_r5 = F_r4;
-Bw_r5 = Bw_r4;
+A_r5 = zeros(n_x);
+A_r5(4,:) = -A(4,:);
+
+F_r5 = F_r1;
+Bw_r5 = Bw_r1;
 
 Hx_r5 = [ con.K_ann*con.dt + [ 0 0 0 1 ] ];
 hx_r5 = [con.vL_min - con.dLmin*con.dt];
@@ -216,7 +225,7 @@ r3 = Polyhedron('A',Hx_r3,'b',hx_r3);
 %Region 4, for Cautious Driver (Outside of Reaction Zone 1)
 A_r4 = [ zeros(3,4) ; con.K_des*con.dt ];
 F_r4 = [ zeros(3,1) ; -con.K_des*[0; 0;0;con.vL_des] ];
-Bw_r4 = {Bw(:,1), Bw(:,2), zeros(n_x,1)};
+Bw_r4 = {Bw(:,1), Bw(:,2), [0;0;0;con.dt]};
 
 Hx_r4 = [ zeros(1,3) -1];
 hx_r4 = -con.h_max;

@@ -24,7 +24,7 @@ con = constants_tri();
 [dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
 dyn_conserv = get_dyn_bdd_vel();
 [dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
-mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
+% mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
 
 %% Select Intention to Use for Invariant Set Growth
 
@@ -57,6 +57,11 @@ S = PolyUnion([X1 X2 X3]);
 
 % cinv set
 C = X2;
+
+% cinv set
+% load CIS_bnd.mat
+% C = lift_inv(CIS_bnd);
+
 
 max_iter = 8;
 

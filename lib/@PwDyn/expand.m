@@ -59,7 +59,7 @@ if isa(V,'Polyhedron')
 end
 
 if plot_stuff
-    fig =figure;
+    fig = figure;
 end
 
 % profile on;
