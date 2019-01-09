@@ -69,7 +69,7 @@ while(1)
     pre_V = pre(pwd0, V, rhoPre);
     V_old = V;
     tmp_V = IntersectPolyUnion(Safe,pre_V);
-    V = PolyUnion([V.Set,tmp_V.Set]);    
+    V.add(tmp_V.Set);    
     V_saved = V;
     try
         V.merge();
