@@ -72,7 +72,8 @@ while(1)
     V = PolyUnion([V.Set,tmp_V.Set]);    
     V_saved = V;
     try
-        V.merge();
+%         V.merge();
+%         V.reduce();
     catch
         V = V_saved;
         V.reduce();
