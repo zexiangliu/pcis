@@ -1,8 +1,13 @@
-function [ pwd_A , pwd_C ] = get_takeover_pwd( )
+function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
 %get_takeover_pwd This function returns the 2 peicewise dynamics defined in
 %Yunus Sahin's document
 %[https://umich.box.com/s/mf77npzwp13jiifvg72ee126g0x3psqa].
 %   
+%   Inputs:
+%       h_lim:  A real number.
+%               This is the limiting value of the domain of the pwd system in the "h" dimension.
+%               i.e. h \in [ -h_lim, h_lim]
+%
 %   Output:
 %       pwd_A: The peicewise affine dynamics for the ANNOYING driver.
 %
@@ -11,6 +16,12 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( )
 
 %Maybe I should load some of these.
 con = constants_tri;
+
+if nargin == 0
+  h_lim = Inf;
+else
+  h_lim = varargin{1};
+end
 
 %% Base Matrices
 
@@ -42,13 +53,23 @@ F_r1 = zeros(n_x,1);
 Bw_r1 = { Bw(:,1), Bw(:,2), zeros(n_x,1) };
 
 %Define Polyhedral domain as Hx * x <= h_x
-Hx_r1 = [ -(con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ]) ]; 
-hx_r1 = [-(con.vL_max - con.dLmax*con.dt)];
+Hx_r1 = [ -(con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ]) ;
+          [ zeros(2,2) [1;-1] zeros(2,1) ] ]; 
+hx_r1 = [-(con.vL_max - con.dLmax*con.dt);
+          con.h_reaction;
+          -con.h_reaction];
 r1 = Polyhedron('A',Hx_r1,'b',hx_r1);
 
 %Create State Dependent Disturbance
-Ew_r1 = [zeros(3,1);1];
-XW_V_r1 = { (1/con.dt)*[zeros(1,3),-1,con.vL_min],(1/con.dt)*[zeros(1,3),-1,con.vL_max] };
+Ew_r1 = [zeros(3,1);con.dt];
+XW_V_r1 = { [zeros(1,4),con.vL_min],[zeros(1,4),con.vL_max] };
+
+%Region 1.5
+Hx_r1_5 = [ 0, 0, -1, 0 ];
+hx_r1_5 = [con.h_reaction];
+
+r1_5 = Polyhedron('A',Hx_r1_5,'b',hx_r1_5);
+
 
 %=============================
 %Region 2, for Annoying Driver
@@ -146,18 +167,27 @@ A_r5(4,:) = -A(4,:);
 F_r5 = F_r1;
 Bw_r5 = Bw_r1;
 
-Hx_r5 = [ con.K_ann*con.dt + [ 0 0 0 1 ] ];
-hx_r5 = [con.vL_min - con.dLmin*con.dt];
+Hx_r5 = [ con.K_ann*con.dt + [ 0 0 0 (1-con.f2*con.dt) ];
+          [ zeros(2,2) [1;-1] zeros(2,1) ]];
+hx_r5 = [ con.vL_min - con.dLmin*con.dt;
+          con.h_reaction;
+          -con.h_reaction];
 r5 = Polyhedron('A',Hx_r5,'b',hx_r5);
 
 %Create State Dependent Disturbance
 Ew_r5 = Ew_r1;
 XW_V_r5 = XW_V_r1;
 
+%Region 5.5
+Hx_r5_5 = [ 0, 0, 1, 0 ];
+hx_r5_5 = [-con.h_reaction];
+
+r5_5 = Polyhedron('A',Hx_r5_5,'b',hx_r5_5);
+
 %=============================
 
 %Create PwDyn Object
-dom = Polyhedron('lb',[con.v_min,con.y_min,-Inf,con.vL_min],'ub',[con.v_max,con.y_max,Inf,con.vL_max] );
+dom = Polyhedron('lb',[con.v_min,con.y_min,-h_lim,con.vL_min],'ub',[con.v_max,con.y_max,h_lim,con.vL_max] );
 
 D = Polyhedron('lb',[con.dmin_ACC,con.dmin_LK,con.dLmin],...
                 'ub',[con.dmax_ACC,con.dmax_LK,con.dLmax]); %Feasible disturbances
@@ -166,11 +196,13 @@ XU = Polyhedron('A',[zeros(n_u,n_x) eye(n_u) ; zeros(n_u,n_x) -eye(n_u) ], ...
 
 Ad = {zeros(n_x),zeros(n_x),zeros(n_x)};
             
-pwd_A = PwDyn(dom, { r1, r2, r3, r4, r5 } , ...
+pwd_A = PwDyn(dom, { r1.intersect(dom), r1_5.intersect(dom), r2.intersect(dom), r3.intersect(dom), r4.intersect(dom), r5.intersect(dom) , r5_5.intersect(dom) } , ...
                 { Dyn(A+A_r1, F_r1, B, XU , {} , {} , Polyhedron(), Ad, Bw_r1 , D , [] , {} , Ew_r1 , XW_V_r1), ...
+                  Dyn(A+A_r1, F_r1, B, XU , {} , {} , Polyhedron(), Ad, Bw_r1 , D , [] , {} , Ew_r1 , XW_V_r1), ...
                   Dyn(A+A_r2, F_r2, B, XU , {} , {} , Polyhedron(), Ad, Bw_r2 , D , [] , {} , Ew_r2 , XW_V_r2), ...
                   Dyn(A+A_r3, F_r3, B, XU , {} , {} , Polyhedron(), Ad, Bw_r3 , D , [] , {} , Ew_r3 , XW_V_r3), ...
                   Dyn(A+A_r4, F_r4, B, XU , {} , {} , Polyhedron(), Ad, Bw_r4 , D ), ...
+                  Dyn(A+A_r5, F_r5, B, XU , {} , {} , Polyhedron(), Ad, Bw_r5 , D , [] , {} , Ew_r5 , XW_V_r5), ...
                   Dyn(A+A_r5, F_r5, B, XU , {} , {} , Polyhedron(), Ad, Bw_r5 , D , [] , {} , Ew_r5 , XW_V_r5)} );
 
              

@@ -20,7 +20,7 @@
 clear;close all;clc;
 con = constants_tri();
 % Get Dynamics
-[dyn_a , dyn_c] = get_takeover_pwd();
+[dyn_a , dyn_c] = get_takeover_pwd(4000);
 [dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
 dyn_conserv = get_dyn_bdd_vel();
 [dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
@@ -36,7 +36,7 @@ dyn_opt = 1;
 
 %% Create Safe Set and Small Invariant Set
 
-h_max = Inf;
+h_max = 4000;
 vl_max = Inf;
 X1 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;      vl_max],...
                 'LB', [con.v_min;   con.y_min;      con.h_min;     -vl_max]);
