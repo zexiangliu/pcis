@@ -20,11 +20,11 @@
 clear;close all;clc;
 con = constants_tri();
 % Get Dynamics
-[dyn_a , dyn_c] = get_takeover_pwd2();
+[dyn_a , dyn_c] = get_takeover_pwd(4000);
 [dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
 dyn_conserv = get_dyn_bdd_vel();
 [dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
-mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
+% mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
 
 %% Select Intention to Use for Invariant Set Growth
 
@@ -35,7 +35,7 @@ dyn_opt = 1;
 % 4 = dyn_a, dual: Find the set of states for which a disturbance exists that will cause the system to be in the dual space (unsafe states)
 
 %% Create Safe Set and Small Invariant Set
-h_max = Inf;
+h_max = 4000;
 vl_max = Inf;
 X1 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;      vl_max],...
                 'LB', [con.v_min;   con.y_min;      con.h_min;     -vl_max]);
@@ -55,6 +55,11 @@ S = PolyUnion([X1 X2 X3]);
 
 % cinv set
 C = X2;
+
+% cinv set
+% load CIS_bnd.mat
+% C = lift_inv(CIS_bnd);
+
 
 max_iter = 8;
 
