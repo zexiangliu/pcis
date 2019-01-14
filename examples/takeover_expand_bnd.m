@@ -18,13 +18,14 @@
 
 %% Constants %%
 clear;close all;clc;
+load CIS_bnd.mat
 con = constants_tri();
 % Get Dynamics
-[dyn_a , dyn_c] = get_takeover_pwd2();
+[dyn_a , dyn_c] = get_takeover_pwd();
 [dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
 dyn_conserv = get_dyn_bdd_vel();
 [dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
-mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
+mptopt('lpsolver', 'LCP', 'qpsolver', 'LCP');
 
 %% Select Intention to Use for Invariant Set Growth
 
@@ -35,6 +36,7 @@ dyn_opt = 1;
 % 4 = dyn_a, dual: Find the set of states for which a disturbance exists that will cause the system to be in the dual space (unsafe states)
 
 %% Create Safe Set and Small Invariant Set
+
 h_max = Inf;
 vl_max = Inf;
 X1 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;      vl_max],...
@@ -43,6 +45,7 @@ X2 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max;     vl_max],...
                 'LB', [con.v_min;   -con.y_min;     -h_max;    -vl_max]);
 X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min;    vl_max],...
                 'LB', [con.v_min;   con.y_min;      -h_max;    -vl_max]);
+
 % Safe set 
 S = PolyUnion([X1 X2 X3]); 
 % figure;clf;hold on
@@ -54,12 +57,11 @@ S = PolyUnion([X1 X2 X3]);
 % ylabel('h');
 
 % cinv set
-C = X2;
-
-max_iter = 8;
-
+C = lift_inv(CIS_bnd);
+max_iter = 1;
+%%
 % reach
-rhoPre = 0; %1e-6;
+rhoPre = 1e-6;
 switch dyn_opt
     case 1
         Xr = expand(dyn_a, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
@@ -162,8 +164,9 @@ elseif Xr.Dim == 3
     axis([-1 3 -50 50]);
     xlabel('ye'); ylabel('h');
     title('vEgo = 20 m/s')
+
 else
-    error(['The resulting Xr has an unexpected dimension: ' num2str(Xr.Dim)])
+    error(['The resulting Xr has an unexpected dimension: ' num2str(Xr.Dim) ])
 end
 
     
