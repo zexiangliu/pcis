@@ -104,7 +104,7 @@ function U = mpc_simple(x0, v_l, con)
     
     % mode 2: a*(v_ex-v_desired)^2+b*u^2 + c*(y-y_desired)^2 + d*h^2
     v_d = 30;
-    y_d = 1.8;
+    y_d = 2.4;
     a = 10;
     b = 1;
     c = 20;

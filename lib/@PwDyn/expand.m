@@ -73,12 +73,14 @@ while(1)
     V_saved = V;
     try
         V.merge();
+%         V.reduce();
+
         1;
     catch
         warning("merge failure.");
         V = V_saved;
         V.reduce();
-        1;
+%         1;
     end
     V
     if(mod(counter,10)==0)

@@ -1,3 +1,5 @@
+% Compare two cautious drivers with ego car supervised or not supervised.
+
 clear all;close all;clc;
 load CIS_bnd.mat
 load CIS_bnd_XU.mat
@@ -132,7 +134,7 @@ for t = 0:con.dt:time_horizon
     vEgoC1 = vEgoC1 - con.f1*vEgoC1*con.dt + aEgoC1*con.dt + wx(index);
     yEgoC1 = yEgoC1 + vyEgoC1*con.dt + wy(index);
     hC1 = hC1 + (vLeadC1 - vEgoC1)*con.dt;
-    vLeadC1 = vLeadC1 - con.f2*vLeadC1*con.dt + aLeadC1*con.dt + wL(index);
+    vLeadC1 = vLeadC1 - con.f1*vLeadC1*con.dt + aLeadC1*con.dt + wL(index);
     xC1 = [vEgoC1; yEgoC1; hC1; vLeadC1];
     
     vEgoC2 = vEgoC2 - con.f1*vEgoC2*con.dt + aEgoC2*con.dt + wx(index);

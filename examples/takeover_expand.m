@@ -24,7 +24,7 @@ con = constants_tri();
 [dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
 dyn_conserv = get_dyn_bdd_vel();
 [dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
-% mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
+mptopt('lpsolver', 'LCP', 'qpsolver', 'GUROBI');
 
 %% Select Intention to Use for Invariant Set Growth
 
@@ -61,7 +61,7 @@ C = X2;
 % C = lift_inv(CIS_bnd);
 
 
-max_iter = 8;
+max_iter = 5;
 
 % reach
 rhoPre = 0; %1e-6;

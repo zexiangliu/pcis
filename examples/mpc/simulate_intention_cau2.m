@@ -1,7 +1,9 @@
+% Compare two cautious drivers with ego car supervised or not supervised.
+% better visual
 clear all;close all;clc;
 load CIS_bnd.mat
 load CIS_bnd_XU.mat
-x0 = [25 0 15 25]';
+x0 = [30 0.1 22 25]';
 xC1 = x0;
 xC2 = x0;
 % function simulate_intention(x0)
@@ -104,7 +106,7 @@ for t = 0:con.dt:time_horizon
     
     % make sure annoying car respects velocity and acceleration bounds
     if abs(hC1) < con.h_reaction
-        aLeadC1 = min(max(-con.K_cau*xC1, con.aL_min), con.aL_max);
+        aLeadC1 = min(max(con.K_cau*xC1, con.aL_min), con.aL_max);
     else
         aLeadC1 = min(max(-(vLeadC1-con.vL_des)/con.dt, con.aL_min), con.aL_max);
     end
@@ -115,7 +117,7 @@ for t = 0:con.dt:time_horizon
     end
     % make sure cautious car respects velocity and acceleration bounds
     if abs(hC2) < con.h_reaction
-        aLeadC2 = min(max(-con.K_cau*xC2, con.aL_min), con.aL_max);
+        aLeadC2 = min(max(con.K_cau*xC2, con.aL_min), con.aL_max);
     else
         aLeadC2 = min(max(-(vLeadC2-con.vL_des)/con.dt, con.aL_min), con.aL_max);
     end
@@ -129,7 +131,7 @@ for t = 0:con.dt:time_horizon
     vEgoC1 = vEgoC1 - con.f1*vEgoC1*con.dt + aEgoC1*con.dt + wx(index);
     yEgoC1 = yEgoC1 + vyEgoC1*con.dt + wy(index);
     hC1 = hC1 + (vLeadC1 - vEgoC1)*con.dt;
-    vLeadC1 = vLeadC1 - con.f2*vLeadC1*con.dt + aLeadC1*con.dt + wL(index);
+    vLeadC1 = vLeadC1 - con.f1*vLeadC1*con.dt + aLeadC1*con.dt + wL(index);
     xC1 = [vEgoC1; yEgoC1; hC1; vLeadC1];
     
     vEgoC2 = vEgoC2 - con.f1*vEgoC2*con.dt + aEgoC2*con.dt + wx(index);

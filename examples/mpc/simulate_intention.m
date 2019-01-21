@@ -6,7 +6,7 @@ xA = x0;
 xC = x0;
 % function simulate_intention(x0)
 con = constants_tri;
-time_horizon = 10;
+time_horizon = 15;
 plot_stuff = 1;
 % initial conditions
 vEgoA = x0(1); yEgoA = x0(2); hA = x0(3); vLeadA = x0(4);
@@ -105,7 +105,7 @@ for t = 0:con.dt:time_horizon
     
     % make sure annoying car respects velocity and acceleration bounds
     if abs(hA) < con.h_reaction
-        aLeadA = min(max(-con.K_ann*xA, con.aL_min), con.aL_max);
+        aLeadA = min(max(con.K_ann*xA, con.aL_min), con.aL_max)
     else
         aLeadA = min(max(-(vLeadA-con.vL_des)/con.dt, con.aL_min), con.aL_max);
     end
@@ -116,7 +116,7 @@ for t = 0:con.dt:time_horizon
     end
     % make sure cautious car respects velocity and acceleration bounds
     if abs(hC) < con.h_reaction
-        aLeadC = min(max(-con.K_cau*xC, con.aL_min), con.aL_max);
+        aLeadC = min(max(con.K_cau*xC, con.aL_min), con.aL_max)
     else
         aLeadC = min(max(-(vLeadC-con.vL_des)/con.dt, con.aL_min), con.aL_max);
     end
