@@ -1,5 +1,5 @@
 function V = expand(varargin)
-% Find controlled invariant set (CIS) C \subseteq S
+% Find controlled invariant set (CIS) V \subseteq S
 % V is CIS to be expanded 
 %
 % Usage:
@@ -73,10 +73,16 @@ while(1)
     V_saved = V;
     try
         V.merge();
+%         V.reduce();
+
+        1;
     catch
+        warning("merge failure.");
         V = V_saved;
         V.reduce();
+%         1;
     end
+    V
     if(mod(counter,10)==0)
       difference = setMinus3(V,V_old);      
       vol = volumePolyUnion(difference.convexHull)
@@ -96,6 +102,6 @@ while(1)
         break;
     end
     
-    iter_num = iter_num + 1;
+    iter_num = iter_num + 1
 
 end
