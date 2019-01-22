@@ -24,7 +24,7 @@ con = constants_tri();
 [dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
 dyn_conserv = get_dyn_bdd_vel();
 [dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
-mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
+% mptopt('lpsolver', 'CDD', 'qpsolver', 'LCP');
 
 %% Select Intention to Use for Invariant Set Growth
 
@@ -74,10 +74,10 @@ switch dyn_opt
                         'LB', [con.v_min;   -con.y_min;     -Inf]);
         X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min],...
                         'LB', [con.v_min;   con.y_min;      -Inf]);
-        S = PolyUnion([X1 X2 X3]);
+        S = PolyUnion([X1 X3]);
         C = X2;
 
-        Xr = dyn_conserv.stay_invariant(S, C, rhoPre, 1 );
+        Xr = dyn_conserv.stay_invariant(S, C, rhoPre, 0 );
     case 4
         C = PolyUnion( [Polyhedron('lb',[con.v_min -Inf -3000 -Inf],'ub',[con.v_max, -0.9, 3000, Inf])] );
         S = PolyUnion([Polyhedron('lb',-Inf(1,4), 'ub',Inf(1,4) )]);

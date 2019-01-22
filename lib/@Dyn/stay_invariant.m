@@ -20,8 +20,10 @@ rho = varargin{4};
 
 if nargin >= 5
     debug_flag = varargin{5};
+    plot_flag = 1;
 else
     debug_flag = 0;
+    plot_flag = 1;
 end
 
 %% Start Algorithm
@@ -126,12 +128,25 @@ while ~is_converged     % repeat until C doesn't grow (can also do it for a fixe
 %     end
 
     % add new found sets to C
-    figure; hold on;
+%     figure; hold on;
     for i = 1:preSets.Num
-        plot(preSets.Set(i).projection([2 3]))
+%         plot(preSets.Set(i))
         C.add( preSets.Set(i) );
     end
     C = C.merge;
+    if plot_flag 
+        hold on;
+        for i = 1:C.Num
+            P = C.Set(i);
+            P2 = Polyhedron('UB', [36; 5; 50], 'LB', [0;-2; -50]);
+            plot(P.intersect(P2));
+            view(120, 15)
+            set(gca,'Xdir', 'reverse','Ydir','reverse','Zdir','reverse');
+            xlabel('ve');ylabel('ye'); zlabel('h');
+            drawnow;
+        end
+    end
+    
     % explore this preSets in the next iteration
     sets2explore = preSets;
     preSets = [];

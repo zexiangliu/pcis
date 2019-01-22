@@ -1,15 +1,14 @@
 function [ pwd_A , pwd_C ] = get_takeover_pwd( )
-%get_takeover_pwd This function returns the 2 peicewise dynamics defined in
+%get_takeover_pwd This function returns the 5 piecewise dynamics defined in
 %Yunus Sahin's document
 %[https://umich.box.com/s/mf77npzwp13jiifvg72ee126g0x3psqa].
 %   
 %   Output:
-%       pwd_A: The peicewise affine dynamics for the ANNOYING driver.
+%       pwd_A: The peicewise affine dynamics for ANNOYING and CAUTIOUS
+%       drivers.
 %
 
 %% Constants
-
-%Maybe I should load some of these.
 con = constants_tri;
 
 %% Base Matrices
@@ -21,7 +20,6 @@ A = [ 1-con.f1*con.dt 0 0 0;
       0 1 0 0;
       -con.dt 0 1 con.dt;
       0 0 0 1-con.f1*con.dt];
-  %%% unsure f_l
 
 B = [eye(2)*con.dt; zeros(2)];
 
