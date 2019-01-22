@@ -228,13 +228,13 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %% Matrix Modifications for the Cautious driver.
-
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   %=============================
   %Region 1, for Cautious Driver
-  %Region in which the feedback can saturate the upper VELOCITY bound, so
+  %Region in which:
+  % - the feedback can saturate the upper VELOCITY bound, so
   %its velocity can change arbitrarily in the feasible domain.
-  %Region in "front of the car". Constraint is implicit.
 
   A_r1 = zeros(n_x);
   F_r1 = zeros(n_x,1);
@@ -249,14 +249,19 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
             con.h_reaction];
   r1 = Polyhedron('A',Hx_r1,'b',hx_r1);
 
-  % %Create State Dependent Disturbance
+  %Create State Dependent Disturbance
+  %In region 1, the input is an acceleration, so the gain term "Ew_r1" should contain a con.dt in it
   Ew_r1 = [zeros(3,1);con.dt];
   XW_V_r1 = {[con.K_cau,con.dLmin-con.K_des*[zeros(3,1);con.vL_des]],(1./con.dt)*[zeros(1,3),-1,con.vL_max]};
 
-  %==========
-  %Region 2
+  %=============================
+  %Region 2, for Cautious Driver
+  %Region in which:
+  % - the lead car is far behind the lead car
+  % - the ego car is outside of the lead car's reaction zone.
+
   A_r2 = zeros(n_x);
-  A_r2(4,:) = -A(4,:);
+  A_r2(4,:) = -A(4,:); %The velocity will be directly controlled by the state-independent disturbance.
   F_r2 = zeros(n_x,1);
 
   Bw_r2 = { Bw(:,1), Bw(:,2), zeros(n_x,1),[zeros(n_x-1,1);1] };
@@ -272,6 +277,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
   %Region in which:
   % - the feedback is not saturating the VELOCITY bound.
   % - the feedback can saturate the lower bound on ACCELERATION.
+  % - the ego car IS IN the lead car's reaction zone.
 
   A_r3 = zeros(n_x);
   % A_r2(4,:) = con.K_cau*con.dt;
@@ -285,7 +291,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
               con.K_cau ;
               con.K_cau ];
   hx_r3 = [   con.vL_max + (con.K_des*[0;0;0;con.vL_des]- con.dLmax)*con.dt ;
-              -con.vL_min + (-con.K_des*[0;0;0;con.vL_des] + con.dLmin)*con.dt;
+              -(con.vL_min - (con.K_des*[0;0;0;con.vL_des] - con.dLmin)*con.dt);
               con.h_reaction ;
               con.h_reaction ;
               con.aL_min - con.dLmin + con.K_des*[0;0;0;con.vL_des];
@@ -293,6 +299,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
   r3 = Polyhedron('A',Hx_r3,'b',hx_r3);
 
   %Create State Dependent Disturbance
+  %In region 3, the input is an acceleration, so the gain term "Ew_r3" should contain a con.dt in it.
   Ew_r3 = [zeros(3,1);con.dt];
   XW_V_r3 = { [zeros(1,4),con.aL_min],[con.K_cau,con.dLmax-con.K_des*[0;0;0;con.vL_des]] };
 
@@ -334,7 +341,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
   A_r5 = zeros(n_x);
   A_r5(4,:) = con.K_cau*con.dt;
 
-  F_r5 = [ zeros(3,1) ; -con.K_des*[0; 0;0;con.vL_des] ]; 
+  F_r5 = [ zeros(3,1) ; -con.K_des*[0; 0;0;con.vL_des]*con.dt ]; 
   Bw_r5 = {Bw(:,1), Bw(:,2), [0;0;0;con.dt] , zeros(n_x,1)};
 
   Hx_r5 = [ con.K_cau*con.dt + [ 0 0 0 (1-con.f2*con.dt) ] ;
