@@ -12,7 +12,8 @@ function [con] = constants_tri()
   con.K_cau = [0 -0.1 0.1 -0.01];
   con.k_cau = con.K_cau(4);
   con.vL_des = 30;
-
+  con.K_des = [0 0 0 1];
+  
   % lateral
   con.y_min = -0.9;
   con.y_max = 2.7;
