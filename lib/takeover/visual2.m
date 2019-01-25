@@ -6,7 +6,9 @@ else
 end
 
 r=50;
-    
+if ~isa(V, 'PolyUnion')
+    V = PolyUnion(V);
+end
 hold on
     p = projectionPolyUnion(V, [1 2 3]);
 %     P2 = Polyhedron('UB', [36; 5; 50], 'LB', [16;-2; -50]);

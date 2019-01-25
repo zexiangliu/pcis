@@ -9,12 +9,11 @@ function [con] = constants_tri()
   con.f1 = 3/36;
   con.f2 = 3/33.5;
   con.K_ann = [ 1 0 0 -1 ];
-  con.K_cau = [0 0.1 0.1 0.01];
-  con.K1_cau = con.K_cau(2);
-  con.K2_cau = con.K_cau(3);
-  con.K3_cau = con.K_cau(4);
+  con.K_cau = [0 -0.1 0.1 -0.01];
+  con.k_cau = con.K_cau(4);
   con.vL_des = 30;
-  con.K_des = [ 0 0 0 1 ];
+  con.K_des = [0 0 0 1];
+  
   % lateral
   con.y_min = -0.9;
   con.y_max = 2.7;

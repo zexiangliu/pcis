@@ -290,7 +290,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
               [ zeros(2,2) [1;-1] zeros(2,1) ] ;
               con.K_cau ;
               con.K_cau ];
-  hx_r3 = [   con.vL_max + (con.K_des*[0;0;0;con.vL_des]- con.dLmax)*con.dt ;
+  hx_r3 = [   (con.vL_max+ (con.K_des*[0;0;0;con.vL_des] - con.dLmax)*con.dt) ;
               -(con.vL_min - (con.K_des*[0;0;0;con.vL_des] - con.dLmin)*con.dt);
               con.h_reaction ;
               con.h_reaction ;
@@ -321,7 +321,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
             -con.K_cau ;
             -con.K_cau ];
   hx_r4 = [ (con.vL_max+ (con.K_des*[0;0;0;con.vL_des] - con.dLmax)*con.dt) ;
-            (-con.vL_min+ (-con.K_des*[0;0;0;con.vL_des] +con.dLmin)*con.dt);
+            -(con.vL_min - (con.K_des*[0;0;0;con.vL_des] - con.dLmin)*con.dt);
             con.h_reaction ;
             con.h_reaction ;
             -(con.aL_min - con.dLmin+con.K_des*[0;0;0;con.vL_des]) ;
@@ -349,28 +349,26 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
             [ zeros(2,2) [1;-1] zeros(2,1) ] ;
             -con.K_cau ;
             con.K_cau];
-  hx_r5 = [ con.vL_max+ (con.K_des*[0;0;0;con.vL_des] - con.dLmax)*con.dt ;
-            -con.vL_min+ (-con.K_des*[0;0;0;con.vL_des]+con.dLmin)*con.dt;
+  hx_r5 = [ (con.vL_max+ (con.K_des*[0;0;0;con.vL_des] - con.dLmax)*con.dt) ;
+            -(con.vL_min - (con.K_des*[0;0;0;con.vL_des] - con.dLmin)*con.dt);
             con.h_reaction ;
             con.h_reaction ;
             -(con.aL_min - con.dLmin+con.K_des*[0;0;0;con.vL_des]);
-            con.aL_max - con.dLmax+con.K_des*[0;0;0;con.vL_des]];
+            (con.aL_max - con.dLmax+con.K_des*[0;0;0;con.vL_des])];
   r5 = Polyhedron('A',Hx_r5,'b',hx_r5);
           
   %==========================================================================================
   %Region 6, for Cautious Driver (Inside of Reaction Zone, Violation of Lower Velocity Bound)
   %Region in which:
+  % - ego vehicle is in the reaction zone of the lead car
   % - the feedback can saturate the lower VELOCITY bound
   %, so its velocity can change arbitrarily in the feasible domain.
-  %Region in "front of the car". Constraint is implicit.
 
   A_r6 = zeros(n_x);
-  A_r6(4,:) = -A(4,:);
-
   F_r6 = F_r1;
   Bw_r6 = Bw_r1;
 
-  Hx_r6 = [ con.K_cau*con.dt + [ 0 0 0 (1-con.f2*con.dt) ];
+  Hx_r6 = [ con.K_cau*con.dt+ [ 0 0 0 (1-con.f2*con.dt) ];
             [ zeros(2,2) [1;-1] zeros(2,1) ]];
   hx_r6 = [ con.vL_min+ (con.K_des*[0;0;0;con.vL_des]- con.dLmin)*con.dt;
             con.h_reaction;
@@ -383,6 +381,10 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
 
   %====================================================================
   %Region 7, for Cautious Driver (Outside of Reaction Zone, Behind Car)
+  %Region in which:
+  % - Ego vehicle is outside of the reaction zone of the lead car
+  % - Ego vehicle is "in front" of the lead vehicle
+
   A_r7 = A_r2;
   F_r7 = zeros(n_x,1);
 
@@ -406,12 +408,13 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd( varargin )
   Ad = {zeros(n_x),zeros(n_x),zeros(n_x),zeros(n_x)};
               
   pwd_C = PwDyn(dom, { r1.intersect(dom), r2.intersect(dom), r3.intersect(dom), r4.intersect(dom), r5.intersect(dom), r6.intersect(dom) , r7.intersect(dom) } , ...
-                  { Dyn(A+A_r1, F_r1, B, XU , {} , {} , Polyhedron(), Ad, Bw_r1 , D , [] , {} , Ew_r1 , XW_V_r1), ...
+                  { ...
+                    Dyn(A+A_r2, F_r2, B, XU , {} , {} , Polyhedron(), Ad, Bw_r2 , D ), ...
                     Dyn(A+A_r2, F_r2, B, XU , {} , {} , Polyhedron(), Ad, Bw_r2 , D ), ...
                     Dyn(A+A_r3, F_r3, B, XU , {} , {} , Polyhedron(), Ad, Bw_r3 , D , [] , {} , Ew_r3 , XW_V_r3), ...
                     Dyn(A+A_r4, F_r4, B, XU , {} , {} , Polyhedron(), Ad, Bw_r4 , D , [] , {} , Ew_r4 , XW_V_r4), ...
                     Dyn(A+A_r5, F_r5, B, XU , {} , {} , Polyhedron(), Ad, Bw_r5 , D ), ...
-                    Dyn(A+A_r6, F_r6, B, XU , {} , {} , Polyhedron(), Ad, Bw_r6 , D , [] , {} , Ew_r6 , XW_V_r6), ...
+                    Dyn(A+A_r7, F_r7, B, XU , {} , {} , Polyhedron(), Ad, Bw_r7 , D ) , ...
                     Dyn(A+A_r7, F_r7, B, XU , {} , {} , Polyhedron(), Ad, Bw_r7 , D )} );
 
 end
