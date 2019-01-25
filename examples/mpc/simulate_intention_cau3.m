@@ -155,7 +155,7 @@ for t = 0:con.dt:time_horizon
     % make sure annoying car respects velocity and acceleration bounds
     if abs(hA1) < con.h_reaction
         deltaA1 = dual_delta(xA1, [aEgoA1;vyEgoA1], UnSafe, con, "ann");
-        aLeadA1 = min(max(con.K_cau*xA1+deltaA1, con.aL_min), con.aL_max);
+        aLeadA1 = min(max(con.K_cau*xA1-con.K_cau(4)*con.vL_des+deltaA1, con.aL_min), con.aL_max);
     else
         aLeadA1 = min(max(-(vLeadA1-con.vL_des)/con.dt, con.aL_min), con.aL_max);
     end
@@ -167,7 +167,7 @@ for t = 0:con.dt:time_horizon
     % make sure cautious car respects velocity and acceleration bounds
     if abs(hA2) < con.h_reaction
         deltaA2 = dual_delta(xA2, [aEgoA2;vyEgoA2], UnSafe, con, "ann");
-        aLeadA2 = min(max(con.K_cau*xA2+deltaA2, con.aL_min), con.aL_max);
+        aLeadA2 = min(max(con.K_cau*xA2-con.K_cau(4)*con.vL_des+deltaA2, con.aL_min), con.aL_max);
     else
         aLeadA2 = min(max(-(vLeadA2-con.vL_des)/con.dt, con.aL_min), con.aL_max);
     end
