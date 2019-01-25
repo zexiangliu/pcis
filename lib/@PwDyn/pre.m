@@ -23,6 +23,7 @@ function [preSets] = pre( varargin )
 			switch varargin{ind}
 				case 'plot_stuff'
 					plot_flag = true;
+                    figure;
 				otherwise
 					error(['Unrecognized input: ' varargin{ind} ])
 			end
@@ -51,9 +52,8 @@ function [preSets] = pre( varargin )
         for i=1:pwd1.num_region
             pre_from_dyn_i = pwd1.reg_list{i}.intersect(pwd1.dyn_list{i}.pre_proj(X, rho));
             % S = add1(S, new_poly);
-
+%             pre_from_dyn_i.isEmptySet
             if plot_flag
-                figure;
                 hold on;
                 plot(pwd1.domain.projection([2 3]),'color','blue')
                 plot(X.projection([2 3]),'color','magenta')

@@ -21,7 +21,7 @@ function V = expand(varargin)
 
 pwd0 = varargin{1};
 Safe = varargin{2};
-V = varargin{3};
+V0 = varargin{3};
 rhoPre = varargin{4};
 
 %Assign defaults to the extra variables.
@@ -51,8 +51,8 @@ end
 
 %% Main Function
 iter_num = 1;
-vol = volumePolyUnion(V);
-
+vol = volumePolyUnion(V0);
+V = V0.copy;
 %Input V is assumed to be a PolyUnion.
 if isa(V,'Polyhedron')
     V = PolyUnion(V);
@@ -60,48 +60,54 @@ end
 
 if plot_stuff
     fig = figure;
+    fig2 = figure;
 end
 
 % profile on;
 counter = 0;
+pre_V = V.copy;
+
 while(1)
     counter = counter + 1;
-    pre_V = pre(pwd0, V, rhoPre);
-    V_old = V;
+    
+    if debug_flag
+        disp("Now doing iteration # "+num2str(iter_num));
+    end
+    
+    pre_V = pre(pwd0, pre_V, rhoPre);
+%     V_old = V;
     tmp_V = IntersectPolyUnion(Safe,pre_V);
     V.add(tmp_V.Set);    
-    V_saved = V;
+%     V_saved = V;
     try
-        V.merge();
+       % V.merge();
 %         V.reduce();
 
         1;
     catch
-        warning("merge failure.");
-        V = V_saved;
-        V.reduce();
+        %warning("merge failure.");
+        %V = V_saved;
+        %V.reduce();
 %         1;
     end
-    V
-    if(mod(counter,10)==0)
-      difference = setMinus3(V,V_old);      
-      vol = volumePolyUnion(difference.convexHull)
-    end
+    V;
+%     if(mod(counter,10)==0)
+%       difference = setMinus3(V,V_old);      
+% %       vol = volumePolyUnion(difference.convexHull);
+%     end
     
 %     fig = figure;
     if plot_stuff
-        visual(V,fig);
+        visual2(V,fig);
+        visual(V, fig2);
     end
         
-    if debug_flag
-        disp("iter_num: "+num2str(iter_num)+", residual volume: "+num2str(vol));
-    end
     
     % Termination Condition
     if(vol == 0 || iter_num >= max_iter)
         break;
     end
     
-    iter_num = iter_num + 1
+    iter_num = iter_num + 1;
 
 end
