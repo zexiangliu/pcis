@@ -36,7 +36,7 @@ classdef PwDyn
             pwd.dyn_list = dyn_list;
 
             %Check to see if the regions in the region list form a partition of the domain.
-            is_this_a_partition(domain,reg_list);
+            is_this_a_partition(pwd);
         end
 
         function dyn = get_region_dyn(pwd, point)

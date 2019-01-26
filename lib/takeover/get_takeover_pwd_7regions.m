@@ -134,7 +134,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions( varargin )
   Hx_r4 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
             (A(4,:)); % vl + almax < vLmax
             -(A(4,:)); % vl + almax > vLmin
-            con.K_ann]; % al > al_max
+            -con.K_ann]; % al > al_max
   hx_r4 = [  con.h_reaction ;
              con.h_reaction ;
             (con.vL_max - con.dLmax*con.dt - con.aL_max*con.dt);
@@ -192,10 +192,11 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions( varargin )
   %==========
   % Region 7 (vlb, alb) - Annoying Driver
   % do not use state feedback
-  % set vL = vL_max - dLmax*dt + dL
+  % set vL = vL_min - dLmin*dt + dL
 
   A_r7 = [zeros(n_x-1, n_x); -A(4,:)]; % do not use state feedback
-  F_r7 = [zeros(n_x-1,1); con.vL_max - con.dLmax*con.dt]; % set vL = vL_max - dLmax*dt + dL
+%   F_r7 = [zeros(n_x-1,1); con.vL_max - con.dLmax*con.dt]; % set vL = vL_max - dLmax*dt + dL
+  F_r7 = [zeros(n_x-1,1); con.vL_min - con.dLmin*con.dt]; % set vL = vL_min - dLmin*dt
 
   Bw_r7 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt]};
 
@@ -331,7 +332,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions( varargin )
   Hx_r4 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
             (A(4,:)); % vl + almax < vLmax
             -(A(4,:)); % vl + almax > vLmin
-            con.K_cau]; % al > al_max
+            -con.K_cau]; % al > al_max
   hx_r4 = [  con.h_reaction ;
              con.h_reaction ;
             (con.vL_max - con.dLmax*con.dt - con.aL_max*con.dt);
@@ -389,10 +390,10 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions( varargin )
   %==========
   % Region 7 (vlb, alb) - Cautious Driver
   % do not use state feedback
-  % set vL = vL_max - dLmax*dt + dL
+  % set vL = vL_min - dLmin*dt + dL
 
   A_r7 = [zeros(n_x-1, n_x); -A(4,:)]; % do not use state feedback
-  F_r7 = [zeros(n_x-1,1); con.vL_max - con.dLmax*con.dt]; % set vL = vL_max - dLmax*dt + dL
+  F_r7 = [zeros(n_x-1,1); con.vL_min - con.dLmin*con.dt]; % set vL = vL_min - dLmin*dt
 
   Bw_r7 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt]  };
 

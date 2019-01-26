@@ -1,4 +1,4 @@
-function [ is_partition ] = is_this_a_partition( D , reg_set )
+function [ is_partition ] = is_this_a_partition( dyn )
 	%is_this_a_partition.m
 	%
 	%Inputs:
@@ -19,7 +19,8 @@ function [ is_partition ] = is_this_a_partition( D , reg_set )
 
 
 	%% Constants
-
+    D = dyn.domain;
+    reg_set = dyn.reg_list;
 	%% Check to See if every element of reg_set is "Disjoint"
 	all_are_disjoint = true;
 	for reg_ind = 1:(length(reg_set)-1)
@@ -56,7 +57,7 @@ function [ is_partition ] = is_this_a_partition( D , reg_set )
 		warning('reg_set is not a subset of D.')
 	end
 
-	is_partition = all_are_disjoint && reg_set_contains_D && D_contains_reg_set;
+	is_partition = all(all_are_disjoint) && all(reg_set_contains_D) && all(D_contains_reg_set);
 
 end
 
