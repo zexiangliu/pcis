@@ -1,10 +1,13 @@
-function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
+function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions( varargin )
 %get_takeover_pwd This function returns the 2 peicewise dynamics defined in
 %Yunus Sahin's document
 %[https://umich.box.com/s/mf77npzwp13jiifvg72ee126g0x3psqa].
 %   
 %   Inputs:
-%       None;
+%       h_lim:  A real number.
+%               This is the limiting value of the domain of the pwd system in the "h" dimension.
+%               i.e. h \in [ -h_lim, h_lim]
+%
 %   Output:
 %       pwd_A: The peicewise affine dynamics for the ANNOYING driver.
 %
@@ -12,8 +15,13 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   %% Constants
 
   %Maybe I should load some of these.
-  con = constants_tri;  
-  h_lim = con.h_reaction;
+  con = constants_tri;
+
+  if nargin == 0
+    h_lim = Inf;
+  else
+    h_lim = varargin{1};
+  end
 
   %Sanity Check
   % con.aL_max = 100;
@@ -80,16 +88,12 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   %Define Polyhedral domain as Hx * x <= h_x
  
   Hx_r2 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            -(con.K_ann*con.dt + A(4,:)); % vl + al > vLmax
-            -(con.K_ann*con.dt + A(4,:)); % vl + al > vLmin
-            -(con.K_ann); % al > almax
-            -con.K_ann]; % al > almin
+            -A(4,:); % vl + almax > vLmax
+            -con.K_ann]; % al > almax
   hx_r2 = [  con.h_reaction ;
              con.h_reaction ;
-            -(con.vL_max - con.dLmax*con.dt) ;
-            -(con.vL_min - con.dLmin*con.dt);
-            -(con.aL_max - con.dLmax); 
-            -(con.aL_min - con.dLmin)];
+            -(con.vL_max - con.dLmax*con.dt - con.aL_max*con.dt);
+            -(con.aL_max - con.dLmax)];
        
   r2 = Polyhedron('A',Hx_r2,'b',hx_r2);
 
@@ -106,15 +110,13 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
  
   Hx_r3 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
             -(con.K_ann*con.dt + A(4,:)); % vl + al > vLmax
-            -(con.K_ann*con.dt + A(4,:)); % vl + al > vLmin
             con.K_ann; % al < almax
             -con.K_ann]; % al > almin
   hx_r3 = [  con.h_reaction ;
              con.h_reaction ;
-            -(con.vL_max - con.dLmax*con.dt) ;
-            -(con.vL_min - con.dLmin*con.dt);
-             con.aL_max - con.dLmax; 
-           -(con.aL_min - con.dLmin)]; 
+            -(con.vL_max - con.dLmax*con.dt);
+            (con.aL_max - con.dLmax);
+            -(con.aL_min - con.dLmin)]; 
 
   r3 = Polyhedron('A',Hx_r3,'b',hx_r3);
 
@@ -124,21 +126,20 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   % set al = al_max
   
   A_r4 = zeros(n_x); % do not use state feedback
-  F_r4 = [zeros(n_x-1, 1); (con.aL_max - con.dLmax)*con.dt]; % using an acceleration near aL_max
+  F_r4 = [zeros(n_x-1, 1); con.aL_max*con.dt]; % but use a fixed al = almax
   Bw_r4 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt] };
 
   %Define Polyhedral domain as Hx * x <= h_x
+ 
   Hx_r4 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            con.K_ann*con.dt + A(4,:); % vl + al < vLmax
-            -(con.K_ann*con.dt + A(4,:)); % vl + al > vLmin
-            -con.K_ann; % al > almax
-            -con.K_ann]; % al > almin
-  hx_r4 = [ con.h_reaction ;
-            con.h_reaction ;
-            con.vL_max - con.dLmax*con.dt ;
-            -(con.vL_min - con.dLmin*con.dt);
-            -(con.aL_max - con.dLmax); 
-            -(con.aL_min - con.dLmin)];
+            (A(4,:)); % vl + almax < vLmax
+            -(A(4,:)); % vl + almax > vLmin
+            -con.K_ann]; % al > al_max
+  hx_r4 = [  con.h_reaction ;
+             con.h_reaction ;
+            (con.vL_max - con.dLmax*con.dt - con.aL_max*con.dt);
+            -(con.vL_min - con.dLmin*con.dt - con.aL_max*con.dt);
+            -(con.aL_max - con.dLmax)]; 
 
   r4 = Polyhedron('A',Hx_r4,'b',hx_r4);
 
@@ -148,21 +149,20 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   % set al = al_min
     
   A_r5 = zeros(n_x); % do not use state feedback
-  F_r5 = [zeros(n_x-1, 1); (con.aL_min-con.dLmin)*con.dt]; % but use an acceleration near aL_min
+  F_r5 = [zeros(n_x-1, 1); con.aL_min*con.dt]; % but use a fixed al = almin
   Bw_r5 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt] };
 
   %Define Polyhedral domain as Hx * x <= h_x
+ 
   Hx_r5 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            con.K_ann*con.dt + A(4,:); % vl + al < vLmax
-            -(con.K_ann*con.dt + A(4,:)); % vl + al > vLmin
-            con.K_ann; % al < almax
-            con.K_ann]; % al < almin
+            (A(4,:)); % vl + almin < vLmax
+            -(A(4,:)); % vl + almin > vLmin
+            con.K_ann]; % al < al_min
   hx_r5 = [  con.h_reaction ;
              con.h_reaction ;
-            con.vL_max - con.dLmax*con.dt ;
-            -(con.vL_min - con.dLmin*con.dt);
-            con.aL_max - con.dLmax; 
-            con.aL_min - con.dLmin];
+            (con.vL_max - con.dLmax*con.dt - con.aL_min*con.dt);
+            -(con.vL_min - con.dLmin*con.dt - con.aL_min*con.dt);
+            (con.aL_min - con.dLmin)]; 
 
   r5 = Polyhedron('A',Hx_r5,'b',hx_r5);
 
@@ -178,15 +178,13 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   %Define Polyhedral domain as Hx * x <= h_x
  
   Hx_r6 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            con.K_ann*con.dt + A(4,:); % vl + al < vLmax
-            con.K_ann*con.dt + A(4,:); % vl + al < vLmin
-            con.K_ann; % al < almax
+            (con.K_ann*con.dt + A(4,:)); % vl + al < vLmin
+             con.K_ann; % al < almax
             -con.K_ann]; % al > almin
-  hx_r6 = [ con.h_reaction ;
-            con.h_reaction ;
-            con.vL_max - con.dLmax*con.dt ;
-            con.vL_min - con.dLmin*con.dt;
-            con.aL_max - con.dLmax; 
+  hx_r6 = [  con.h_reaction ;
+             con.h_reaction ;
+            (con.vL_min - con.dLmin*con.dt);
+            (con.aL_max - con.dLmax);
             -(con.aL_min - con.dLmin)];
        
   r6 = Polyhedron('A',Hx_r6,'b',hx_r6);
@@ -205,16 +203,12 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   %Define Polyhedral domain as Hx * x <= h_x
  
   Hx_r7 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            con.K_ann*con.dt + A(4,:); % vl + al < vLmax
-            con.K_ann*con.dt + A(4,:); % vl + al < vLmin
-            con.K_ann; % al < almax
+            (A(4,:)); % vl + almin < vLmin
             con.K_ann]; % al < almin
   hx_r7 = [  con.h_reaction ;
              con.h_reaction ;
-            con.vL_max - con.dLmax*con.dt ;
-            con.vL_min - con.dLmin*con.dt;
-            con.aL_max - con.dLmax; 
-            con.aL_min - con.dLmin]; 
+            (con.vL_min - con.dLmin*con.dt - con.aL_min*con.dt);
+            (con.aL_min - con.dLmin)]; 
 
   r7 = Polyhedron('A',Hx_r7,'b',hx_r7);
 
@@ -290,17 +284,14 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   Bw_r2 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt]  };
 
   %Define Polyhedral domain as Hx * x <= h_x
+ 
   Hx_r2 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            -(con.K_cau*con.dt + A(4,:)); % vl + al > vLmax
-            -(con.K_cau*con.dt + A(4,:)); % vl + al > vLmin
-            -con.K_cau; % al > almax
-            -con.K_cau]; % al > almin
-  hx_r2 = [ con.h_reaction ;
-            con.h_reaction ;
-            -(con.vL_max + con.k_cau*con.vL_des*con.dt - con.dLmax*con.dt);
-            -(con.vL_min + con.k_cau*con.vL_des*con.dt - con.dLmin*con.dt);
-            -(con.aL_max + con.k_cau*con.vL_des - con.dLmax); 
-            -(con.aL_min + con.k_cau*con.vL_des - con.dLmin)];
+            -A(4,:); % vl + almax > vLmax
+            -con.K_cau]; % al > almax
+  hx_r2 = [  con.h_reaction ;
+             con.h_reaction ;
+            -(con.vL_max - con.dLmax*con.dt - con.aL_max*con.dt);
+            -(con.aL_max + con.k_cau*con.vL_des - con.dLmax)];
        
   r2 = Polyhedron('A',Hx_r2,'b',hx_r2);
 
@@ -314,17 +305,16 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   Bw_r3 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt]  };
 
   %Define Polyhedral domain as Hx * x <= h_x
+ 
   Hx_r3 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
             -(con.K_cau*con.dt + A(4,:)); % vl + al > vLmax
-            -(con.K_cau*con.dt + A(4,:)); % vl + al > vLmin
             con.K_cau; % al < almax
             -con.K_cau]; % al > almin
-  hx_r3 = [ con.h_reaction ;
-            con.h_reaction ;
+  hx_r3 = [  con.h_reaction ;
+             con.h_reaction ;
             -(con.vL_max + con.k_cau*con.vL_des*con.dt - con.dLmax*con.dt);
-            -(con.vL_min + con.k_cau*con.vL_des*con.dt - con.dLmin*con.dt);
-            con.aL_max + con.k_cau*con.vL_des - con.dLmax; 
-            -(con.aL_min + con.k_cau*con.vL_des - con.dLmin)];
+            (con.aL_max + con.k_cau*con.vL_des - con.dLmax);
+            -(con.aL_min + con.k_cau*con.vL_des - con.dLmin)]; 
 
   r3 = Polyhedron('A',Hx_r3,'b',hx_r3);
 
@@ -334,21 +324,20 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   % set al = al_max
   
   A_r4 = zeros(n_x); % do not use state feedback
-  F_r4 = [zeros(n_x-1, 1); (con.aL_max-con.dLmax)*con.dt]; % but use acceleration near aL_max
+  F_r4 = [zeros(n_x-1, 1); con.aL_max*con.dt]; % but use a fixed al = almax
   Bw_r4 = { Bw(:,1), Bw(:,2),[0;0;0;con.dt]  };
 
   %Define Polyhedral domain as Hx * x <= h_x
+ 
   Hx_r4 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            con.K_cau*con.dt + A(4,:); % vl + al < vLmax
-            -(con.K_cau*con.dt + A(4,:)); % vl + al > vLmin
-            -con.K_cau; % al > almax
-            -con.K_cau]; % al > almin
-  hx_r4 = [ con.h_reaction ;
-            con.h_reaction ;
-            con.vL_max + con.k_cau*con.vL_des*con.dt - con.dLmax*con.dt;
-            -(con.vL_min + con.k_cau*con.vL_des*con.dt - con.dLmin*con.dt);
-            -(con.aL_max + con.k_cau*con.vL_des - con.dLmax); 
-            -(con.aL_min + con.k_cau*con.vL_des - con.dLmin)];
+            (A(4,:)); % vl + almax < vLmax
+            -(A(4,:)); % vl + almax > vLmin
+            -con.K_cau]; % al > al_max
+  hx_r4 = [  con.h_reaction ;
+             con.h_reaction ;
+            (con.vL_max - con.dLmax*con.dt - con.aL_max*con.dt);
+            -(con.vL_min - con.dLmin*con.dt - con.aL_max*con.dt);
+            -(con.aL_max + con.k_cau*con.vL_des - con.dLmax)]; 
 
   r4 = Polyhedron('A',Hx_r4,'b',hx_r4);
 
@@ -358,21 +347,20 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   % set al = al_min
     
   A_r5 = zeros(n_x); % do not use state feedback
-  F_r5 = [zeros(n_x-1, 1); (con.aL_min-con.dLmin)*con.dt]; % but use an acceleration near aL_min
+  F_r5 = [zeros(n_x-1, 1); con.aL_min*con.dt]; % but use a fixed al = almin
   Bw_r5 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt]  };
 
   %Define Polyhedral domain as Hx * x <= h_x
+ 
   Hx_r5 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            con.K_cau*con.dt + A(4,:); % vl + al < vLmax
-            -(con.K_cau*con.dt + A(4,:)); % vl + al > vLmin
-            con.K_cau; % al < almax
-            con.K_cau]; % al < almin
-  hx_r5 = [ con.h_reaction ;
-            con.h_reaction ;
-            con.vL_max + con.k_cau*con.vL_des*con.dt - con.dLmax*con.dt;
-            -(con.vL_min + con.k_cau*con.vL_des*con.dt - con.dLmin*con.dt);
-            con.aL_max + con.k_cau*con.vL_des - con.dLmax; 
-            con.aL_min + con.k_cau*con.vL_des - con.dLmin];
+            (A(4,:)); % vl + almin < vLmax
+            -(A(4,:)); % vl + almin > vLmin
+            con.K_cau]; % al < al_min
+  hx_r5 = [  con.h_reaction ;
+             con.h_reaction ;
+            (con.vL_max - con.dLmax*con.dt - con.aL_min*con.dt);
+            -(con.vL_min - con.dLmin*con.dt - con.aL_min*con.dt);
+            (con.aL_min + con.k_cau*con.vL_des - con.dLmin)]; 
 
   r5 = Polyhedron('A',Hx_r5,'b',hx_r5);
 
@@ -386,18 +374,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   Bw_r6 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt]  };
 
   %Define Polyhedral domain as Hx * x <= h_x
-  Hx_r6 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            con.K_cau*con.dt + A(4,:); % vl + al < vLmax
-            con.K_cau*con.dt + A(4,:); % vl + al < vLmin
-            con.K_cau; % al < almax
-            -con.K_cau]; % al > almin
-  hx_r6 = [ con.h_reaction ;
-            con.h_reaction ;
-            con.vL_max + con.k_cau*con.vL_des*con.dt - con.dLmax*con.dt;
-            con.vL_min + con.k_cau*con.vL_des*con.dt - con.dLmin*con.dt;
-            con.aL_max + con.k_cau*con.vL_des - con.dLmax; 
-            -(con.aL_min + con.k_cau*con.vL_des - con.dLmin)];
-
+ 
   Hx_r6 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
             (con.K_cau*con.dt + A(4,:)); % vl + al < vLmin
              con.K_cau; % al < almax
@@ -421,17 +398,14 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
   Bw_r7 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt]  };
 
   %Define Polyhedral domain as Hx * x <= h_x
+ 
   Hx_r7 = [ [ zeros(2,2) [1;-1] zeros(2,1) ] ; % -|hr| < |h| < |hr|
-            con.K_cau*con.dt + A(4,:); % vl + al < vLmax
-            con.K_cau*con.dt + A(4,:); % vl + al < vLmin
-            con.K_cau; % al < almax
+            (A(4,:)); % vl + almin < vLmin
             con.K_cau]; % al < almin
-  hx_r7 = [ con.h_reaction ;
-            con.h_reaction ;
-            con.vL_max + con.k_cau*con.vL_des*con.dt - con.dLmax*con.dt;
-            con.vL_min + con.k_cau*con.vL_des*con.dt - con.dLmin*con.dt;
-            con.aL_max + con.k_cau*con.vL_des - con.dLmax; 
-            con.aL_min + con.k_cau*con.vL_des - con.dLmin];
+  hx_r7 = [  con.h_reaction ;
+             con.h_reaction ;
+            (con.vL_min - con.dLmin*con.dt - con.aL_min*con.dt);
+            (con.aL_min + con.k_cau*con.vL_des - con.dLmin)]; 
 
   r7 = Polyhedron('A',Hx_r7,'b',hx_r7);
 
@@ -456,4 +430,3 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions()
                     Dyn(A+A_r6, F_r6, B, XU , {} , {} , Polyhedron(), Ad, Bw_r6 , D ), ...
                     Dyn(A+A_r7, F_r7, B, XU , {} , {} , Polyhedron(), Ad, Bw_r7 , D )});
 end
-
