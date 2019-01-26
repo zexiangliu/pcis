@@ -126,7 +126,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions( varargin )
   % set al = al_max
   
   A_r4 = zeros(n_x); % do not use state feedback
-  F_r4 = [zeros(n_x-1, 1); con.aL_max*con.dt]; % but use a fixed al = almax
+  F_r4 = [zeros(n_x-1, 1); (con.aL_max-con.dLmax)*con.dt]; % but use a fixed al = almax
   Bw_r4 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt] };
 
   %Define Polyhedral domain as Hx * x <= h_x
@@ -149,7 +149,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions( varargin )
   % set al = al_min
     
   A_r5 = zeros(n_x); % do not use state feedback
-  F_r5 = [zeros(n_x-1, 1); con.aL_min*con.dt]; % but use a fixed al = almin
+  F_r5 = [zeros(n_x-1, 1); (con.aL_min- con.dLmin)*con.dt]; % but use a fixed al = almin
   Bw_r5 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt] };
 
   %Define Polyhedral domain as Hx * x <= h_x
@@ -324,7 +324,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions( varargin )
   % set al = al_max
   
   A_r4 = zeros(n_x); % do not use state feedback
-  F_r4 = [zeros(n_x-1, 1); con.aL_max*con.dt]; % but use a fixed al = almax
+  F_r4 = [zeros(n_x-1, 1); (con.aL_max- con.dLmax)*con.dt]; % but use a fixed al = almax
   Bw_r4 = { Bw(:,1), Bw(:,2),[0;0;0;con.dt]  };
 
   %Define Polyhedral domain as Hx * x <= h_x
@@ -347,7 +347,7 @@ function [ pwd_A , pwd_C ] = get_takeover_pwd_7regions( varargin )
   % set al = al_min
     
   A_r5 = zeros(n_x); % do not use state feedback
-  F_r5 = [zeros(n_x-1, 1); con.aL_min*con.dt]; % but use a fixed al = almin
+  F_r5 = [zeros(n_x-1, 1); (con.aL_min- con.dLmin)*con.dt]; % but use a fixed al = almin
   Bw_r5 = { Bw(:,1), Bw(:,2), [0;0;0;con.dt]  };
 
   %Define Polyhedral domain as Hx * x <= h_x
