@@ -1,12 +1,18 @@
-function plotU(x, PU)
+function plotU(x, PU, fig)
 % x is a point, PU is polyUnion
 
-figure;hold on;
+if nargin == 2
+    figure;hold on;
+else
+    figure(fig);hold on;
+end
+
 plot(Polyhedron('ub', [3 1.8], 'lb', [-3 -1.8]), 'Color', 'r');
 
 num = PU.Num;
 count = 0;
 count2 = 0;
+dim = PU.Set(1).Dim-2;
 
 for p = 1:PU.Num;
     count = count + 1;
@@ -18,7 +24,7 @@ for p = 1:PU.Num;
         pause(0.001);
     end
     
-    pp = PU.Set(p).slice([1 2 3 4], x);
+    pp = PU.Set(p).slice(1:dim, x);
     if pp.isEmptySet
 %         disp(['EmptySet at iteration ', num2str(p)]);
         continue

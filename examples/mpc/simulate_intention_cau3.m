@@ -2,10 +2,14 @@
 % better visual
 % solve dual delta
 clear all;close all;clc;
-load CIS_bnd.mat
+% load CIS_bnd.mat
 load CIS_bnd_XU.mat
+load CIS_inv_R7.mat
+CIS = CIS_cau;
+dim = 4;
+pre_XU = CIS_cau_XU;
 x0 = [30 0.1 22 25]';
-if ~containsPolyUnion(CIS_bnd,x0(1:3))
+if ~containsPolyUnion(CIS,x0(1:dim))
     error("bad initial point!")
 end
 
@@ -99,7 +103,7 @@ for t = 0:con.dt:time_horizon
 
     % put your controller here
     u_c1 = mpc_simple(xA1(1:3),xA1(4),con);
-    U_f1 = get_input(preXU_bnd,xA1,3);
+    U_f1 = get_input(pre_XU,xA1,dim);
     u_c1 = u_c1(:,1);
 %     u_c1 = mpc_supervisory(xA1,CIS_bnd, preXU_bnd, con);
     aEgoA1 = u_c1(1,1); 
@@ -112,7 +116,7 @@ for t = 0:con.dt:time_horizon
 %     u_c2 = mpc_simple(xA2(1:3),xA2(4),con);
 %     ud_c2 = u_c2;
 %     U_f2 = get_input(preXU_bnd,xA1,3);
-    [u_c2, ud_c2, ~, U_f2] = mpc_supervisory(xA2,CIS_bnd, preXU_bnd, con);
+    [u_c2, ud_c2, ~, U_f2] = mpc_supervisory(xA2,CIS, pre_XU, con);
     
     % plot input region
     subplot(312);
