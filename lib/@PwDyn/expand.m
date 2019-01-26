@@ -76,18 +76,18 @@ while(1)
     
     pre_V = pre(pwd0, pre_V, rhoPre);
 %     V_old = V;
-    tmp_V = IntersectPolyUnion(Safe,pre_V);
-    V.add(tmp_V.Set);    
+    pre_V = IntersectPolyUnion(Safe,pre_V);
+    V.add(pre_V.Set);    
 %     V_saved = V;
     try
-       % V.merge();
-%         V.reduce();
+%        pre_V.merge();
+        pre_V.reduce();
 
         1;
     catch
         %warning("merge failure.");
         %V = V_saved;
-        %V.reduce();
+%         pre_V.reduce();
 %         1;
     end
     V;
