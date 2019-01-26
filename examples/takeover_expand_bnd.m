@@ -21,19 +21,15 @@ clear;close all;clc;
 load CIS_bnd.mat
 con = constants_tri();
 % Get Dynamics
-[dyn_a , dyn_c] = get_takeover_pwd2();
-[dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
+[dyn_a , dyn_c] = get_takeover_pwd_5R();
 dyn_conserv = get_dyn_bdd_vel();
-[dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
-mptopt('lpsolver', 'LCP', 'qpsolver', 'GUROBI');
+mptopt('lpsolver', 'CDD', 'qpsolver', 'GUROBI');
 
 %% Select Intention to Use for Invariant Set Growth
 
-dyn_opt = 7;
+dyn_opt = 2;
 % 1 = dyn_a: Aggressive or Annoying Piecewise Affine Dynamics
 % 2 = dyn_c: Cautious Piecewise Affine Dynamics
-% 3 = dyn_conservative: Affine Dynamics with 3 states and the assumption that lead vehicle can arbitrarily choose its velocity from a bounded set.
-% 4 = dyn_a, dual: Find the set of states for which a disturbance exists that will cause the system to be in the dual space (unsafe states)
 
 %% Create Safe Set and Small Invariant Set
 
@@ -67,36 +63,9 @@ max_iter = 5;
 rhoPre = 0;
 switch dyn_opt
     case 1
-        Xr = expand(dyn_a, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
-    case 2
-        Xr = expand(dyn_c, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
-    case 3
-        X1 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max],...
-                        'LB', [con.v_min;   con.y_min;      con.h_min]);
-        X2 = Polyhedron('UB', [con.v_max;   con.y_max;      h_max],...
-                        'LB', [con.v_min;   -con.y_min;     -h_max]);
-        X3 = Polyhedron('UB', [con.v_max;   con.y_max;      -con.h_min],...
-                        'LB', [con.v_min;   con.y_min;      -h_max]);
-        S = PolyUnion([X1 X2 X3]);
-        C = X2;
-
-        Xr = dyn_conserv.stay_invariant(S, C, rhoPre, 1 );
-    case 4
-        C = PolyUnion( [Polyhedron('lb',[con.v_min -Inf -3000 -Inf],'ub',[con.v_max, -0.9, 3000, Inf])] );
-        S = PolyUnion([Polyhedron('lb',-Inf(1,4), 'ub',Inf(1,4) )]);
-        Xr = dyn_a_dual.expand(S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
-    case 5
-        seed = load("seed.mat");
-        C = seed.C;
-        Xr = expand(dyn_a, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
-    case 6 
-        Xr = expand(dyn_a_nn, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
-    case 7
         CIS_ann = expand(dyn_a, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
+    case 2
         CIS_cau = expand(dyn_c, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
-        save CIS_inv.mat
-    otherwise
-        error(['Unrecognized dyn_opt value: ' num2str(dyn_opt) ])
 end
 
 %% Plotting

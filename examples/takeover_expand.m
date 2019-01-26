@@ -20,15 +20,15 @@
 clear;close all;clc;
 con = constants_tri();
 % Get Dynamics
-[dyn_a , dyn_c] = get_takeover_pwd(4000);
-[dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
+[dyn_a , dyn_c] = get_takeover_pwd_7regions();
+% [dyn_a_dual , dyn_c_dual] = get_takeover_pwd_dual();
 dyn_conserv = get_dyn_bdd_vel();
-[dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
-mptopt('lpsolver', 'LCP', 'qpsolver', 'GUROBI');
+% [dyn_a_nn, dyn_c_nn] = get_takeover_pwd();
+mptopt('lpsolver', 'GUROBI', 'qpsolver', 'GUROBI');
 
 %% Select Intention to Use for Invariant Set Growth
 
-dyn_opt = 1;
+dyn_opt = 2;
 % 1 = dyn_a: Aggressive or Annoying Piecewise Affine Dynamics
 % 2 = dyn_c: Cautious Piecewise Affine Dynamics
 % 3 = dyn_conservative: Affine Dynamics with 3 states and the assumption that lead vehicle can arbitrarily choose its velocity from a bounded set.
