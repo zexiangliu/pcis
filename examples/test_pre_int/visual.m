@@ -4,38 +4,43 @@ if(nargin == 1)
 else
     figure(fig);
 end
-    
+
+color = 'c';
 subplot(221);hold on
     p = Polyhedron('ub', [5, 50], 'lb', [-1,-50]);
     p2 = IntersectPolyUnion(p,V.slice([1 4], [25 25]));
-    plot(p2, 'color', 'r');
+    plot(p2, 'color',color);
     set(gca,'Xdir','reverse','Ydir','reverse')
-    axis([-1 5 -30 30]);
-    xlabel('ye'); ylabel('h');
-    title('vEgo = 25 m/s, vLead = 25 m/s')
-
+    axis([-1 2.8 -30 30]);
+    xlabel('$y_e$', 'interpreter','latex'); ylabel('$h$', 'interpreter','latex');
+    title('$v_{e,x} = 25 m/s, v_{L,x} = 25 m/s$', 'interpreter','latex')
+    set(gca,'fontsize',12)
+    
     subplot(222);hold on
     p2 = IntersectPolyUnion(p, V.slice([1 4], [30 20]));
-    plot(p2, 'color', 'r');
+    plot(p2, 'color', color);
     set(gca,'Xdir','reverse','Ydir','reverse')
-    axis([-1 5 -30 30]);
-    xlabel('ye'); ylabel('h');
-    title('vEgo = 30 m/s, vLead = 20 m/s')
-
+    axis([-1 2.8 -30 30]);
+    xlabel('$y_e$', 'interpreter','latex'); ylabel('$h$', 'interpreter','latex');
+    title('$v_{e,x} = 30 m/s, v_{L,x} = 20 m/s$', 'interpreter','latex')
+    set(gca,'fontsize',12)
+    
     subplot(223);hold on
     p2 = IntersectPolyUnion(p, V.slice([1 4], [16 25]));
-    plot(p2, 'color', 'r');
+    plot(p2, 'color', color);
     set(gca,'Xdir','reverse','Ydir','reverse')
-    axis([-1 5 -30 30]);
-    xlabel('ye'); ylabel('h');
-    title('vEgo = 16 m/s, vLead = 25 m/s')
-
+    axis([-1 2.8  -30 30]);
+    xlabel('$y_e$', 'interpreter','latex'); ylabel('$h$', 'interpreter','latex');
+    title('$v_{e,x} = 16 m/s, v_{L,x} = 25 m/s$', 'interpreter','latex')
+    set(gca,'fontsize',12)
+    
     subplot(224);hold on
     p2 = IntersectPolyUnion(p, V.slice([1 4], [25 0]));
-    plot(p2, 'color', 'r');
+    plot(p2, 'color',color);
     set(gca,'Xdir','reverse','Ydir','reverse')
-    axis([-1 5 -30 30]);
-    xlabel('ye'); ylabel('h');
-    title('vEgo = 25 m/s, vLead = 0 m/s');
+    axis([-1 2.8  -30 30]);
+    xlabel('$y_e$', 'interpreter','latex'); ylabel('$h$', 'interpreter','latex');
+    title('$v_{e,x} = 25 m/s, v_{L,x} = 0 m/s$', 'interpreter','latex');
+    set(gca,'fontsize',12)
     drawnow;
 end

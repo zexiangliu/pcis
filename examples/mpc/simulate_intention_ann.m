@@ -1,15 +1,30 @@
-% Compare two annoying drivers with ego car supervised or not supervised.
-
+% Compare two aggressive drivers with ego car supervised or not supervised.
+% better visual
+% solve dual delta
 clear all;close all;clc;
-load CIS_bnd.mat
+% load CIS_bnd.mat
 load CIS_bnd_XU.mat
-x0 = [25 0 15 25]';
+load CIS_inv_R7.mat
+mkdir pic
+CIS = CIS_ann;
+dim = 4;
+pre_XU = preXU_ann;
+x0 = [30 0.1 22 25]';
+if ~containsPolyUnion(CIS,x0(1:dim))
+    error("bad initial point!")
+end
+
 xA1 = x0;
 xA2 = x0;
 % function simulate_intention(x0)
 con = constants_tri;
-time_horizon = 10;
+time_horizon = 20;
 plot_stuff = 1;
+
+
+UnSafe = Polyhedron('UB',[inf inf con.h_min, inf],'LB',...
+    -[inf inf con.h_min, inf]);
+
 % initial conditions
 vEgoA1 = x0(1); yEgoA1 = x0(2); hA1 = x0(3); vLeadA1 = x0(4);
 vEgoA2 = x0(1); yEgoA2 = x0(2); hA2 = x0(3); vLeadA2 = x0(4);
@@ -23,9 +38,12 @@ XA1 = zeros(4,time_horizon/con.dt+1);
 XA2 = zeros(4,time_horizon/con.dt+1);
 
 % simulate
-figure;
-
+fig = figure('position',[100 100 1200 640]);
+msiz = 200; % marker size
+malpha = 0.5; % marker alpha
+fsiz = 12;
 counter = 1;
+
 for t = 0:con.dt:time_horizon
     % visualize
     index = round(t/con.dt+1);
@@ -34,31 +52,42 @@ for t = 0:con.dt:time_horizon
     if plot_stuff
         %figure;
         clf; 
+        subplot(311)
         title(['t = ', num2str(t)]);
 
-%         subplot(211)
         hold on    
         % road
-        plot([-200 4000],[-3.2,-3.2],'k-','LineWidth',3);
-        plot([-200 4000],[-6.4,-6.4],'k--','LineWidth',3);
-        plot([-200 4000],[-9.8,-9.8],'k-','LineWidth',3);
         plot([-200 4000],[3.2,3.2],'k-','LineWidth',3);
-        plot([-200 4000],[6.4,6.4],'k--','LineWidth',3);
-        plot([-200 4000],[9.8,9.8],'k-','LineWidth',3);
-        axis([xEgoA1-100 xEgoA1+100 -10 10])
-        plot(xEgoA1, yEgoA1 + 4.8, 'sb', 'markersize', 5,'MarkerFaceColor', 'b');
-        plot(xEgoA1+hA1, 4.8, 'sr', 'markersize', 5,'MarkerFaceColor', 'r');
-        text(xEgoA1+hA1, 4.3,'annoying','HorizontalAlignment', 'center');
-        text(xEgoA1, 6 + xA1(2),'ego wo sp','HorizontalAlignment', 'center');
-
-        % cautious scenario
+        plot([-200 4000],[5,5],'k--','LineWidth',3);
+        plot([-200 4000],[6.8,6.8],'k-','LineWidth',3);
+        axis([xEgoA1-100 xEgoA1+100 3 7])
+        car1 = scatter(xEgoA1, yEgoA1 + 4.1, msiz, 'sb',...
+            'MarkerFaceColor', 'b','MarkerEdgeColor','b');
+        car2 = scatter(xEgoA1+hA1, 4.1, msiz, 's',...
+            'MarkerFaceColor', 'k', 'MarkerEdgeColor','k');
         
-        plot(xEgoA2, yEgoA2 - 8.1, 'db', 'markersize', 5,'MarkerFaceColor', 'b');
-        plot(xEgoA2 + hA2, -8.1, 'dr', 'markersize', 5, 'MarkerFaceColor', 'r');
-        text(xEgoA2 + hA2, -8.6 , 'annoying', 'HorizontalAlignment', 'center');
-        text(xEgoA2, -6.9 + xA2(2),'ego wt sp','HorizontalAlignment', 'center');
-
+        text(xEgoA1, 5.2+ xA1(2),'ego1 wo sp','FontSize',fsiz,...
+            'Color','b','HorizontalAlignment', 'center');
+        text(xEgoA1+hA1, 3.4,'agg1','FontSize',fsiz,...
+            'Color','k','HorizontalAlignment', 'center');
         
+        % annoying scenario
+        
+        car3 = scatter(xEgoA2, yEgoA2 + 4.1, msiz, 'd',...
+            'MarkerFaceColor', 'g','MarkerEdgeColor','g');
+        car4 = scatter(xEgoA2 + hA2, 4.1, msiz, 'd',...
+            'MarkerFaceColor', 'r','MarkerEdgeColor','r');
+        
+        text(xEgoA2, 4.6 + xA2(2),'ego2 wt sp','FontSize',fsiz,...
+            'Color','g','HorizontalAlignment', 'center');
+        text(xEgoA2 + hA2, 3.8 , 'agg2','FontSize',fsiz, ...
+            'Color','r','HorizontalAlignment', 'center');
+
+%         car1.MarkerFaceAlpha = malpha;
+        car2.MarkerFaceAlpha = malpha;
+        car3.MarkerFaceAlpha = malpha;
+        car4.MarkerFaceAlpha = malpha;
+
 %         subplot(212)
 %         hold on
 %         plot(XA(3,1:max(index-1,1)), 'r-');
@@ -66,17 +95,17 @@ for t = 0:con.dt:time_horizon
 %         plot([0 time_horizon/con.dt], [0 0], 'k')
 %         plot([0 time_horizon/con.dt], [4 4], 'k--')
 %         ylim([0 5])        
-        drawnow;
+%         drawnow;
     end
-    M(counter) = getframe;
-    counter = counter + 1;
     % keep history of the states
 
     XA1(:,index) = [vEgoA1;yEgoA1;hA1;vLeadA1];
     XA2(:,index) = [vEgoA2;yEgoA2;hA2;vLeadA2];
 
     % put your controller here
-    u_c1 = mpc_simple(xA1(1:3),xA1(4),con);
+    u_c1 = mpc_tailgate(xA1(1:3),xA1(4),con,t);
+    U_f1 = get_input(pre_XU,xA1,dim);
+    u_c1 = u_c1(:,1);
 %     u_c1 = mpc_supervisory(xA1,CIS_bnd, preXU_bnd, con);
     aEgoA1 = u_c1(1,1); 
     vyEgoA1 = u_c1(2,1);
@@ -86,7 +115,28 @@ for t = 0:con.dt:time_horizon
     
     % put your controller here
 %     u_c2 = mpc_simple(xA2(1:3),xA2(4),con);
-    u_c2 = mpc_supervisory(xA2,CIS_bnd, preXU_bnd, con);
+%     ud_c2 = u_c2;
+%     U_f2 = get_input(preXU_bnd,xA1,3);
+    [u_c2, ud_c2, ~, U_f2] = mpc_supervisory(xA2,CIS, pre_XU, con, t);
+    
+    % plot input region
+    subplot(312);
+    plot(Polyhedron('ub', [3 1.8], 'lb', [-3 -1.8]), 'Color', 'r');
+    hold on;
+    plot(U_f1,'Color','b','edgealpha',0);
+    plot(u_c1(1),u_c1(2),'og','markersize',15, 'linewidth', 2);
+    hold off;
+    title("input of ego1");
+    subplot(313);
+    plot(Polyhedron('ub', [3 1.8], 'lb', [-3 -1.8]), 'Color', 'r');
+    hold on;
+    plot(U_f2,'Color','b','edgealpha',0);
+    plot(ud_c2(1),ud_c2(2),'og','markersize',15, 'linewidth', 2);
+    plot(u_c2(1),u_c2(2),'.g','markersize',30);
+    hold off;
+    title("input of ego2")
+    drawnow;
+
     aEgoA2 = u_c2(1,1); 
     vyEgoA2 = u_c2(2,1);
     % make sure inputs satisfy limits
@@ -109,7 +159,8 @@ for t = 0:con.dt:time_horizon
     
     % make sure annoying car respects velocity and acceleration bounds
     if abs(hA1) < con.h_reaction
-        aLeadA1 = min(max(-con.K_ann*xA1, con.aL_min), con.aL_max);
+        deltaA1 = dual_delta(xA1, [aEgoA1;vyEgoA1], UnSafe, con, "ann");
+        aLeadA1 = min(max(con.K_ann*xA1+deltaA1, con.aL_min), con.aL_max);
     else
         aLeadA1 = min(max(-(vLeadA1-con.vL_des)/con.dt, con.aL_min), con.aL_max);
     end
@@ -118,9 +169,10 @@ for t = 0:con.dt:time_horizon
     elseif vLeadA1 + aLeadA1 * con.dt < con.vL_min
         aLeadA1 = (con.vL_min - vLeadA1)/con.dt;
     end
-    % make sure cautious car respects velocity and acceleration bounds
+    % make sure annoying car respects velocity and acceleration bounds
     if abs(hA2) < con.h_reaction
-        aLeadA2 = min(max(-con.K_ann*xA2, con.aL_min), con.aL_max);
+        deltaA2 = dual_delta(xA2, [aEgoA2;vyEgoA2], UnSafe, con, "ann");
+        aLeadA2 = min(max(con.K_ann*xA2+deltaA2, con.aL_min), con.aL_max);
     else
         aLeadA2 = min(max(-(vLeadA2-con.vL_des)/con.dt, con.aL_min), con.aL_max);
     end
@@ -129,7 +181,6 @@ for t = 0:con.dt:time_horizon
     elseif vLeadA2 + aLeadA2 * con.dt < con.vL_min
         aLeadA2 = (con.vL_min - vLeadA2)/con.dt;
     end
-    
     % state updates
     vEgoA1 = vEgoA1 - con.f1*vEgoA1*con.dt + aEgoA1*con.dt + wx(index);
     yEgoA1 = yEgoA1 + vyEgoA1*con.dt + wy(index);
@@ -142,7 +193,8 @@ for t = 0:con.dt:time_horizon
     hA2 = hA2 + (vLeadA2 - vEgoA2)*con.dt;
     vLeadA2 = vLeadA2 - con.f1*vLeadA2*con.dt + aLeadA2*con.dt + wL(index);
     xA2 = [vEgoA2; yEgoA2; hA2; vLeadA2];
-
-        
+    M(counter) = getframe(fig);
+    counter = counter + 1;
+    print(fig,['./pic/frame',num2str(counter-1)],'-dpng');
 end
 

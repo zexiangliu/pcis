@@ -4,33 +4,45 @@ if(nargin == 1)
 else
     figure(fig);
 end
-    
+color = 'r';
+V_new = V.copy();
+box = Polyhedron("lb",[-inf,-inf,-50],"ub",[inf,inf,50]);
+V_new = IntersectPolyUnion(V_new,box);
 subplot(221);hold on
-    plot(V.slice([1], [25]));
+    plot(V_new.slice([1], [25]),'color',color);
     set(gca,'Xdir','reverse','Ydir','reverse')
-    axis([-1 5 -30 30]);
-    xlabel('ye'); ylabel('h');
-    title('vEgo = 25 m/s')
+    axis([-1 2.8 -30 30]);
+    xlabel('$y_e$', 'interpreter','latex'); ylabel('$h$', 'interpreter','latex');
+%     set(gca,"fontsize",12)
+%     title('$v_{e,x} = 25 m/s$', 'interpreter','latex')
+    set(gca,'fontsize',12)
 
     subplot(222);hold on
-    plot(V.slice([1], [30]));
+    plot(V_new.slice([1], [30]),'color',color);
     set(gca,'Xdir','reverse','Ydir','reverse')
-    axis([-1 5 -30 30]);
-    xlabel('ye'); ylabel('h');
-    title('vEgo = 30 m/s')
+    axis([-1 2.8 -30 30]);
+    xlabel('$y_e$', 'interpreter','latex'); ylabel('$h$', 'interpreter','latex');
+%     set(gca,"fontsize",12)
+%     title('$v_{e,x} = 30 m/s$', 'interpreter','latex')
+    set(gca,'fontsize',12)
 
     subplot(223);hold on
-    plot(V.slice([1], [16]));
+    plot(V_new.slice([1], [16]),'color',color);
     set(gca,'Xdir','reverse','Ydir','reverse')
-    axis([-1 5 -30 30]);
-    xlabel('ye'); ylabel('h');
-    title('vEgo = 16 m/s')
+    axis([-1 2.8 -30 30]);
+    xlabel('$y_e$', 'interpreter','latex'); ylabel('$h$', 'interpreter','latex');
+%     set(gca,"fontsize",12)
+%     title('$v_{e,x} = 16 m/s$', 'interpreter','latex')
+    set(gca,'fontsize',12)
 
     subplot(224);hold on
-    plot(V.slice([1], [25]));
+    plot(V_new.slice([1], [25]),'color',color);
     set(gca,'Xdir','reverse','Ydir','reverse')
-    axis([-1 5 -30 30]);
-    xlabel('ye'); ylabel('h');
-    title('vEgo = 25 m/s');
+    axis([-1 2.8 -30 30]);
+    xlabel('$y_e$', 'interpreter','latex'); ylabel('$h$', 'interpreter','latex');
+%     set(gca,"fontsize",12)
+%     title('$v_{e,x} = 25 m/s$', 'interpreter','latex');
+    set(gca,'fontsize',12)
+
     drawnow;
 end

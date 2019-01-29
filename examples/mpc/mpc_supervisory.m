@@ -1,4 +1,4 @@
-function [u_s, u ,U, U_f] = mpc_supervisory(x0, C, C_XU, con)
+function [u_s, u ,U, U_f] = mpc_supervisory(x0, C, C_XU, con, t)
 % the mpc controller under supervisory
 % inputs: x0 --- current state
 %         v_l --- lead car speed
@@ -7,7 +7,11 @@ function [u_s, u ,U, U_f] = mpc_supervisory(x0, C, C_XU, con)
 % outputs: u --- current input
 %          U --- input sequence gotten by MPC
 %          U_f --- polyunion, feasible inputs
-    U = mpc_simple(x0(1:3),x0(4), con);
+    if nargin == 4
+        U = mpc_simple(x0(1:3),x0(4), con);
+    elseif nargin == 5
+        U = mpc_tailgate(x0(1:3),x0(4), con, t);
+    end
     u = U(:,1);
     dim = C.Set(1).Dim;
     if nargout == 4

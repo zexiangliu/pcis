@@ -7,7 +7,8 @@ else
     figure(fig);hold on;
 end
 
-plot(Polyhedron('ub', [3 1.8], 'lb', [-3 -1.8]), 'Color', 'r');
+plot(Polyhedron('ub', [3 1.8], 'lb', [-3 -1.8]), 'Color', [1,1,1]);
+% plot(Polyhedron('ub', [3 1.8], 'lb', [-3 -1.8]), 'Color', 'r');
 
 num = PU.Num;
 count = 0;
@@ -29,5 +30,7 @@ for p = 1:PU.Num;
 %         disp(['EmptySet at iteration ', num2str(p)]);
         continue
     end
-    plot(pp, 'color', 'g');
+    plot(pp, 'color', [150, 150, 255]/255, 'alpha',1,'edgealpha',0);
+%     plot(pp, 'color', [0 0 1], 'alpha',0, 'linewidth',2);
+%     plot(pp, 'color', 'g', 'alpha',1,'edgealpha',1);
 end

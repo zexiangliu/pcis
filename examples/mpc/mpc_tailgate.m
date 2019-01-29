@@ -1,9 +1,9 @@
-function U = mpc_simple(x0, v_l, con)
+function U = mpc_tailgate(x0, v_l, con, t)
 % implement MPC for simple dynamics here 
 %   inputs: x0 --- initial state
 %           v_l --- measurement of lead car speed
 %           con --- constraints and parameters            
-    h = 20; % time horizon you want to predict
+    h = 50; % time horizon you want to predict
     n = 3; % num of states
     m = 2; % num of inputs
     
@@ -87,7 +87,17 @@ function U = mpc_simple(x0, v_l, con)
     idx1 = ind_x_i_all(1);
     idx2 = ind_x_i_all(2);
     idx3 = ind_x_i_all(3);
-
+    
+    % mode_0: a*(h-h_des)^2+b*u^2
+    a = 10;
+    b = 5;
+    h_des = 10.5;
+    H0 = zeros(num,num);
+    H0(idx3,idx3) = eye(length(idx3))*a;
+    H0(ind_x_i(h,n)+1:end,ind_x_i(h,n)+1:end) = eye(num-ind_x_i(h,n))*b;
+    f0 = zeros(num,1);
+    f0(idx3) = -a*h_des;
+    
     % mode 1: a*(v_ex-v_desired)^2+b*u^2
     v_d = 30;
     y_d = 0;
@@ -102,7 +112,7 @@ function U = mpc_simple(x0, v_l, con)
     f1(idx2) = -c*y_d;
     H1(ind_x_i(h,n)+1:end,ind_x_i(h,n)+1:end) = eye(num-ind_x_i(h,n))*b;
     
-    % mode 2: a*(v_ex-v_desired)^2+b*u^2 + c*(y-y_desired)^2 + d*h^2
+    % mode 2: a*(v_ex-v_desired)^2+b*u^2 + c*(y-y_desired)^2 + d*(h-h_des)^2
     v_d = 30;
     y_d = 1.8;
     a = 10;
@@ -110,12 +120,14 @@ function U = mpc_simple(x0, v_l, con)
     c = 20;
     d = 15;
     H2 = zeros(num,num);
+    h_des2 = -10;
     H2(idx1,idx1) = eye(length(idx1))*a;
     f2 = zeros(num,1);
     f2(idx1) = -a*v_d;
     H2(idx2,idx2) = eye(length(idx2))*c;
     f2(idx2) = -c*y_d;
     H2(idx3,idx3) = eye(length(idx3))*d;
+    f2(idx3) = -d*h_des2;
     H2(ind_x_i(h,n)+1:end,ind_x_i(h,n)+1:end) = eye(num-ind_x_i(h,n))*b;
 
     % mode 3: a*(v_ex-v_desired)^2+b*u^2 + c*(y-y_desired)^2 - d*h
@@ -136,9 +148,11 @@ function U = mpc_simple(x0, v_l, con)
     
     % quadprog
     h_act = 50; % the h to start takeover
-    if x0(3) >= h_act
+    if t<= 3
+        [X,~,flag] = quadprog(H0,f0,Aineq,bineq,Aeq,beq);
+    elseif x0(3) >= h_act
         [X,~,flag] = quadprog(H1,f1,Aineq,bineq,Aeq,beq);
-    elseif x0(3) < h_act && x0(3) >= -3
+    elseif x0(3) < h_act && x0(3) >= h_des2
         [X,~,flag] = quadprog(H2,f2,Aineq,bineq,Aeq,beq);
     else
         [X,~,flag] = quadprog(H3,f3,Aineq,bineq,Aeq,beq);
@@ -147,7 +161,9 @@ function U = mpc_simple(x0, v_l, con)
     if flag == 1
         U = reshape(X(h*n + 1:end),[m,h]);
     else
-        error("no solution!");
+%         keyboard();
+        warning("no solution!");
+        U = reshape(X(h*n + 1:end),[m,h]);
     end
     
 end

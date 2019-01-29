@@ -8,7 +8,8 @@ load CIS_bnd_XU.mat
 % rho = 0;
 mptopt('lpsolver', 'CDD', 'qpsolver', 'GUROBI');
 
-
+% visual(CIS_ann);
+% visual(CIS_cau);
 
 %%
 % str_x = "(";
@@ -16,29 +17,46 @@ mptopt('lpsolver', 'CDD', 'qpsolver', 'GUROBI');
 %     str_x = str_x+num2str(x(i),'%.2f')+",";
 % end
 % str_x(end) = str_x+num2str(x(4),'%.2f')+")";
-fig1 = figure(1);
-fig2 = figure(2);
-fig3 = figure(3);
-for  idx = 500:900
-    [x,u] = get_from_traj(idx);
- 
-    str_x = num2str(idx);
+fig1 = figure(3);
+% fig2 = figure(4);
+% fig3 = figure(5);
+% [x,u] = get_from_traj(idx);
+u = [0;0];
+x = [25; -0.297; 16.52; 20];
+containsPolyUnion(CIS_cau,x)
+containsPolyUnion(CIS_ann,x)
+containsPolyUnion(CIS_bnd,x(1:3))
 
-    mkdir("s_"+str_x)
-    plotU(x,CIS_cau_XU,fig1);
-    hold on;
-    plot(u(1),u(2),'x','Markersize',15);
+%%
+% str_x = num2str(idx);
+subplot(131);
+plotU(x,preXU_ann,fig1)
+% plot(u(1),u(2),'x','Markersize',15);
+%     print("s_"+str_x+"/"+"ann_"+str_x,'-dpng');
+xlabel("$a_{e,x}$", 'interpreter','latex')
+ylabel("$v_{e,y}$", 'interpreter','latex')
+set(gca,"fontsize",12)
+title("agressive driver", 'interpreter','latex')
+
+subplot(132);
+% mkdir("s_"+str_x)
+plotU(x,preXU_cau,fig1);
+% hold on;
+xlabel("$a_{e,x}$", 'interpreter','latex')
+ylabel("$v_{e,y}$", 'interpreter','latex')
+set(gca,"fontsize",12)
+title("cautious driver", 'interpreter','latex');
+% plot(u(1),u(2),'x','Markersize',15);
 %     print("s_"+str_x+"/"+"cau_"+str_x,'-dpng');
-
-    plotU(x,CIS_ann_XU,fig2)
-    plot(u(1),u(2),'x','Markersize',15);
+subplot(133);
+plotU(x(1:3),preXU_bnd,fig1)
+xlabel("$a_{e,x}$", 'interpreter','latex')
+ylabel("$v_{e,y}$", 'interpreter','latex')
+set(gca,"fontsize",12)
+title("bounded velocity", 'interpreter','latex');
+% plot(u(1),u(2),'x','Markersize',15);
+drawnow;
 %     print("s_"+str_x+"/"+"ann_"+str_x,'-dpng');
-
-    plotU(x(1:3),preXU_bnd,fig3)
-    plot(u(1),u(2),'x','Markersize',15);
-    drawnow;
-%     print("s_"+str_x+"/"+"ann_"+str_x,'-dpng');
-end
 
 % safeU = get_safe_inputs('ac', x, CIS_ac, dyn_a, dyn_c);
 %%
