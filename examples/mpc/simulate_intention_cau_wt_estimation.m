@@ -8,14 +8,14 @@ load CIS_inv_R7.mat
 load CIS_bnd.mat
 mkdir pic
 %CIS = CIS_ann;
-dim = 4;
+
 %pre_XU = preXU_ann;
 Iv = 'bnd';
 Iv_CIS = CIS_bnd.copy();
 Iv_preXU = preXU_bnd.copy();
-
-x0 = [30 0.1 100 25]';
-if ~containsPolyUnion(Iv_CIS,x0(1:3))
+dim = Iv_CIS.Set(1).Dim;
+x0 = [30 0.1 65 25]';
+if ~containsPolyUnion(Iv_CIS,x0(1:dim))
     error("bad initial point!")
 end
 
@@ -171,9 +171,11 @@ for t = 0:con.dt:time_horizon
             if strcmp(Iv, 'ann')
                 Iv_CIS = CIS_ann.copy();
                 Iv_preXU = preXU_ann.copy();
+                dim = Iv_CIS.Set(1).Dim;
             elseif strcmp(Iv, 'cau')
                 Iv_CIS = CIS_cau.copy();
                 Iv_preXU = preXU_cau.copy();
+                dim = Iv_CIS.Set(1).Dim;
             end
         end
     else
