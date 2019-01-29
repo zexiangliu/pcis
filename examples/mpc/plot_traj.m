@@ -10,14 +10,15 @@ preXU = preXU_ann;
 
 fig = figure('position',[100 100 640 500]);
 sizU = size(U_list,2);
+wl = 3.5;
 subplot(221)
-plot(T_list(1:sizU),U_list(1,:),'r-','linewidth',3);
+plot(T_list(1:sizU),U_list(1,:),'r-','linewidth',wl);
 subplot(223)
-plot(T_list(1:sizU),U_list(2,:),'r-','linewidth',3);
+plot(T_list(1:sizU),U_list(2,:),'r-','linewidth',wl);
 subplot(222)
-plot(T_list(1:sizU),U_list(1,:),'r-','linewidth',3);
+plot(T_list(1:sizU),U_list(1,:),'r-','linewidth',wl);
 subplot(224)
-plot(T_list(1:sizU),U_list(2,:),'r-','linewidth',3);
+plot(T_list(1:sizU),U_list(2,:),'r-','linewidth',wl);
 
 U1_list1 = [];
 U1_list2 = [];
@@ -31,6 +32,7 @@ t3_list = [];
 U4_list1 = [];
 U4_list2 = [];
 t4_list = [];
+lw = 1.5;
 
 for i = 1:step
    x = X_list(:,i);
@@ -50,8 +52,8 @@ for i = 1:step
    elseif ~isempty(t1_list)
        hold on;
        shade(t1_list,U1_list1,U1_list2);
-       plot(t1_list,U1_list1,'-b','linewidth',3);
-       plot(t1_list,U1_list2,'-b','linewidth',3);
+       plot(t1_list,U1_list1,'-b','linewidth',lw);
+       plot(t1_list,U1_list2,'-b','linewidth',lw);
        U1_list1 = [];
        U1_list2 = [];
        t1_list = [];
@@ -69,8 +71,8 @@ for i = 1:step
    elseif ~isempty(t2_list)
        hold on;
        shade(t2_list,U2_list1,U2_list2);
-       plot(t2_list,U2_list1,'-b','linewidth',3);
-       plot(t2_list,U2_list2,'-b','linewidth',3);
+       plot(t2_list,U2_list1,'-b','linewidth',lw);
+       plot(t2_list,U2_list2,'-b','linewidth',lw);
        U2_list1 = [];
        U2_list2 = [];
        t2_list = [];
@@ -93,8 +95,8 @@ for i = 1:step
    elseif ~isempty(t3_list)
        hold on;
        shade(t3_list,U3_list1,U3_list2);
-       plot(t3_list,U3_list1,'-b','linewidth',3);
-       plot(t3_list,U3_list2,'-b','linewidth',3);
+       plot(t3_list,U3_list1,'-b','linewidth',lw);
+       plot(t3_list,U3_list2,'-b','linewidth',lw);
        U3_list1 = [];
        U3_list2 = [];
        t3_list = [];
@@ -117,8 +119,8 @@ for i = 1:step
    elseif ~isempty(t4_list)
        hold on;
        shade(t4_list,U4_list1,U4_list2);
-       plot(t4_list,U4_list1,'-b','linewidth',3);
-       plot(t4_list,U4_list2,'-b','linewidth',3);
+       plot(t4_list,U4_list1,'-b','linewidth',lw);
+       plot(t4_list,U4_list2,'-b','linewidth',lw);
        U4_list1 = [];
        U4_list2 = [];
        t4_list = [];
@@ -129,8 +131,8 @@ end
 subplot(221)
   hold on;
   shade(t1_list,U1_list1,U1_list2);
-       plot(t1_list,U1_list1,'-b','linewidth',3);
-       plot(t1_list,U1_list2,'-b','linewidth',3);
+       plot(t1_list,U1_list1,'-b','linewidth',lw);
+       plot(t1_list,U1_list2,'-b','linewidth',lw);
        title("throttle/bounded velocity inv set", 'interpreter','latex')
        xlabel("$t$", 'interpreter','latex');
        ylabel("$a_{e,x}$", 'interpreter','latex');
@@ -138,8 +140,8 @@ subplot(221)
 subplot(223)
   hold on;
   shade(t2_list,U2_list1,U2_list2);
-       plot(t2_list,U2_list1,'-b','linewidth',3);
-       plot(t2_list,U2_list2,'-b','linewidth',3);   
+       plot(t2_list,U2_list1,'-b','linewidth',lw);
+       plot(t2_list,U2_list2,'-b','linewidth',lw);   
        title("steering/bounded velocity inv set", 'interpreter','latex')
        xlabel("$t$", 'interpreter','latex');
        ylabel("$v_{e,y}$", 'interpreter','latex');
@@ -147,8 +149,8 @@ subplot(223)
 subplot(222)
   hold on;
   shade(t3_list,U3_list1,U3_list2);
-       plot(t3_list,U3_list1,'-b','linewidth',3);
-       plot(t3_list,U3_list2,'-b','linewidth',3);
+       plot(t3_list,U3_list1,'-b','linewidth',lw);
+       plot(t3_list,U3_list2,'-b','linewidth',lw);
        title("throttle/aggressive driver inv set", 'interpreter','latex')
        xlabel("$t$", 'interpreter','latex');
        ylabel("$a_{e,x}$", 'interpreter','latex');
@@ -156,8 +158,8 @@ subplot(222)
 subplot(224)
   hold on;
   shade(t4_list,U4_list1,U4_list2);
-       plot(t4_list,U4_list1,'-b','linewidth',3);
-       plot(t4_list,U4_list2,'-b','linewidth',3);
+       plot(t4_list,U4_list1,'-b','linewidth',lw);
+       plot(t4_list,U4_list2,'-b','linewidth',lw);
        title("steering/aggressive driver inv set", 'interpreter','latex')
        xlabel("$t$", 'interpreter','latex');
        ylabel("$v_{e,x}$", 'interpreter','latex');
