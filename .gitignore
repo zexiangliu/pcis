@@ -8,5 +8,5 @@
 *.fig
 *.avi
 *.mp4
-tests/test_pre_int/achieve
 .DS_Store
+achieve*

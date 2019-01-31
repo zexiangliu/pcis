@@ -14,7 +14,7 @@ load CIS_inv_R7.mat
 step = size(T_list,2)-1;
 preXU = preXU_cau;
 %%
-fig = figure('position',[100 100 640 500]);
+fig = figure('position',[100 100 840 300]);
 sizU = size(U_list,2);
 wl = 3.5;
 subplot(221)

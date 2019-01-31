@@ -86,8 +86,8 @@ for t = 0:con.dt:time_horizon
     XA1(:,index) = [vEgoA1;yEgoA1;hA1;vLeadA1];
 
     % put your controller here
-    u_c1 = mpc_simple(xA1(1:3),xA1(4),con);
-%     u_c1 = mpc_tailgate(xA1(1:3),xA1(4),con,t);
+%     u_c1 = mpc_simple(xA1(1:3),xA1(4),con);
+    u_c1 = mpc_tailgate(xA1(1:3),xA1(4),con,t);
     U_f1 = get_input(pre_XU,xA1,dim);
     u_c1 = u_c1(:,1);
 %     u_c1 = mpc_supervisory(xA1,CIS_bnd, preXU_bnd, con);

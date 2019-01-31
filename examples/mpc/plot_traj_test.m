@@ -1,0 +1,100 @@
+% plot the steering and throttle of the MPC controller over time
+% plot the safe input set over the MPC inputs
+
+load traj_cau.mat
+load CIS_bnd.mat
+load CIS_bnd_XU.mat
+load CIS_inv_R7.mat
+step = size(T_list,2)-1;
+preXU = preXU_ann;
+
+fig = figure('position',[100 100 840 300]);
+sizU = size(U_list,2);
+
+U1_list1 = [];
+U1_list2 = [];
+ind1_list = [];
+U2_list1 = [];
+U2_list2 = [];
+ind2_list = [];
+U3_list1 = [];
+U3_list2 = [];
+ind3_list = [];
+U4_list1 = [];
+U4_list2 = [];
+ind4_list = [];
+
+for i = 1:step
+   i
+   x = X_list(:,i);
+   u = U_list(:,i);
+   t = T_list(i);
+   pre_xu1 = preXU_bnd.slice([1,2,3],x(1:3));
+   pre_xu2 = US_list(i);
+   if ~isempty(pre_xu1.Set)
+       u1 = pre_xu1.slice(2,u(2));
+       if u1.Num >= 1
+           [v1,v2] = find_V(u1);
+           U1_list1 = [U1_list1, v1];
+           U1_list2 = [U1_list2, v2];
+           ind1_list = [ind1_list,i];
+       end
+       % steering; bnd vel
+       u2 = pre_xu1.slice(1,u(1));
+       if u2.Num >= 1
+           [v1,v2] = find_V(u2);
+           U2_list1 = [U2_list1, v1];
+           U2_list2 = [U2_list2, v2];
+           ind2_list = [ind2_list,i];
+       end
+   end
+   % throttle; cau
+   u3 = pre_xu2.slice(2,u(2));
+   if u3.Num >= 1
+       [v1,v2] = find_V(u3);
+       U3_list1 = [U3_list1, v1];
+       U3_list2 = [U3_list2, v2];
+       ind3_list = [ind3_list,i];
+   end
+   % throttle; cau
+   u4 = pre_xu2.slice(1,u(1));
+   if u4.Num >= 1
+       [v1,v2] = find_V(u4);
+       U4_list1 = [U4_list1, v1];
+       U4_list2 = [U4_list2, v2];
+       ind4_list = [ind4_list,i];
+   end
+end
+%%
+
+wl = 3.5;
+subplot(221)
+plot(T_list(1:sizU),U_list(1,:),'r-','linewidth',wl);
+subplot(223)
+plot(T_list(1:sizU),U_list(2,:),'r-','linewidth',wl);
+subplot(222)
+plot(T_list(1:sizU),U_list(1,:),'r-','linewidth',wl);
+subplot(224)
+plot(T_list(1:sizU),U_list(2,:),'r-','linewidth',wl);
+subplot(221)
+hold on;
+title = "throttle/bounded velocity inv set";
+ylabel = "$a_{e,x}$";
+plot_traj(ind1_list,U1_list1,U1_list2,T_list,title,ylabel);
+subplot(223)
+hold on;
+title = "steering/bounded velocity inv set";
+ylabel = "$v_{e,y}$";
+plot_traj(ind2_list,U2_list1,U2_list2,T_list,title,ylabel);
+subplot(222)
+hold on;
+title = "throttle/aggressive driver inv set";
+ylabel = "$a_{e,x}$";
+plot_traj(ind3_list,U3_list1,U3_list2,T_list,title,ylabel);
+subplot(224)
+hold on;
+title = "steering/aggressive driver inv set";
+ylabel = "$v_{e,y}$";
+plot_traj(ind4_list,U4_list1,U4_list2,T_list,title,ylabel)
+
+
