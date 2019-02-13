@@ -173,11 +173,13 @@ classdef Dyn
       if isa(X, 'PolyUnion')	
 		X0 = PolyUnion;
         for i=1:X.Num
-          new_poly = pre_proj(d, X.Set(i), rho);
+%           new_poly = pre_proj(d, X.Set(i), rho);
+          new_poly = pre_rho(d, X.Set(i), rho);
           X0.add(new_poly);
         end
       else
-        X0 = pre_proj(d, X, rho);
+%         X0 = pre_proj(d, X, rho);
+          X0 = pre_rho(d, X, rho);
       end
     end
   end
