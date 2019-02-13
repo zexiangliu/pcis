@@ -103,12 +103,12 @@ function U = mpc_simple(x0, v_l, con)
     H1(ind_x_i(h,n)+1:end,ind_x_i(h,n)+1:end) = eye(num-ind_x_i(h,n))*b;
     
     % mode 2: a*(v_ex-v_desired)^2+b*u^2 + c*(y-y_desired)^2 + d*h^2
-    v_d = 30;
+    v_d = con.v_max;
     y_d = 1.8;
     a = 10;
     b = 1;
     c = 20;
-    d = 15;
+    d = 0;
     H2 = zeros(num,num);
     H2(idx1,idx1) = eye(length(idx1))*a;
     f2 = zeros(num,1);

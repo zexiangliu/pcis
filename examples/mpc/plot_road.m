@@ -8,4 +8,5 @@ function plot_road(x_e,t)
     plot([-200 4000],[5,5],'k--','LineWidth',3);
     plot([-200 4000],[6.8,6.8],'k-','LineWidth',3);
     axis([x_e-100 x_e+100 3 7])
+    set(gca,'ytick',[])
 end

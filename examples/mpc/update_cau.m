@@ -18,9 +18,9 @@ function [x_new, Iv] = update_cau(x,u,w,UnSafe,con)
     Iv = "bnd";
      % make sure cautious car respects velocity and acceleration bounds
     if abs(hA2) < con.h_reaction
-        deltaA2 = dual_delta(xA2, [aEgoA2;vyEgoA2], UnSafe, con, "ann");
-        aLeadA2 = min(max(con.K_cau*xA2-con.K_cau(4)*con.vL_des+deltaA2, con.aL_min), con.aL_max);
-        if nargin == 2
+        deltaA2 = dual_delta(x, [aEgoA2;vyEgoA2], UnSafe, con, "cau");
+        aLeadA2 = min(max(con.K_cau*x-con.K_cau(4)*con.vL_des+deltaA2, con.aL_min), con.aL_max)
+        if nargout == 2
             Iv = intention_estimation(x, aLeadA2, con);
         end
     else
@@ -32,9 +32,9 @@ function [x_new, Iv] = update_cau(x,u,w,UnSafe,con)
         aLeadA2 = (con.vL_min - vLeadA2)/con.dt;
     end
     % state updates
-    vEgoA2 = vEgoA2 - con.f1*vEgoA2*con.dt + aEgoA2*con.dt + wx(index);
-    yEgoA2 = yEgoA2 + vyEgoA2*con.dt + wy(index);
     hA2 = hA2 + (vLeadA2 - vEgoA2)*con.dt;
-    vLeadA2 = vLeadA2 - con.f1*vLeadA2*con.dt + aLeadA2*con.dt + wL(index);
+    vEgoA2 = vEgoA2 - con.f1*vEgoA2*con.dt + aEgoA2*con.dt + wx;
+    yEgoA2 = yEgoA2 + vyEgoA2*con.dt + wy;
+    vLeadA2 = vLeadA2 - con.f1*vLeadA2*con.dt + aLeadA2*con.dt + wL;
     x_new = [vEgoA2; yEgoA2; hA2; vLeadA2];
 end

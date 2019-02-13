@@ -19,8 +19,10 @@ function [x_new, Iv] = update_agg(x,u,w,UnSafe,con)
     % make sure the car respects velocity and acceleration bounds
     if abs(hA1) < con.h_reaction
         deltaA1 = dual_delta(x, [aEgoA1;vyEgoA1], UnSafe, con, "ann");
-        aLeadA1 = min(max(con.K_cau*x-con.K_cau(4)*con.vL_des+deltaA1, con.aL_min), con.aL_max);
-        if nargin == 2
+%         aLeadA1 = min(max(con.K_cau*x-con.K_cau(4)*con.vL_des+deltaA1, con.aL_min), con.aL_max);
+        aLeadA1 = min(max(con.K_ann*x+deltaA1, con.aL_min), con.aL_max);
+
+        if nargout == 2
             Iv = intention_estimation(x, aLeadA1, con);
         end
     else
@@ -32,9 +34,9 @@ function [x_new, Iv] = update_agg(x,u,w,UnSafe,con)
         aLeadA1 = (con.vL_min - vLeadA1)/con.dt;
     end
     % state updates
+    hA1 = hA1 + (vLeadA1 - vEgoA1)*con.dt;
     vEgoA1 = vEgoA1 - con.f1*vEgoA1*con.dt + aEgoA1*con.dt + wx;
     yEgoA1 = yEgoA1 + vyEgoA1*con.dt + wy;
-    hA1 = hA1 + (vLeadA1 - vEgoA1)*con.dt;
     vLeadA1 = vLeadA1 - con.f1*vLeadA1*con.dt + aLeadA1*con.dt + wL;
     x_new = [vEgoA1; yEgoA1; hA1; vLeadA1];
 

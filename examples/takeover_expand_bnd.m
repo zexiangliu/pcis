@@ -23,11 +23,11 @@ con = constants_tri();
 % Get Dynamics
 [dyn_a , dyn_c] = get_takeover_pwd_7regions();
 dyn_conserv = get_dyn_bdd_vel();
-mptopt('lpsolver', 'CDD', 'qpsolver', 'GUROBI');
+mptopt('lpsolver', 'GUROBI', 'qpsolver', 'GUROBI');
 
 %% Select Intention to Use for Invariant Set Growth
 
-dyn_opt = 1;
+dyn_opt = 2;
 % 1 = dyn_a: Aggressive or Annoying Piecewise Affine Dynamics
 % 2 = dyn_c: Cautious Piecewise Affine Dynamics
 
@@ -57,7 +57,7 @@ C = lift_inv(CIS_bnd);
 box = Polyhedron('UB', [con.v_max, con.y_max, 5*1e5, vl_max],...
             'LB', [con.v_min, con.y_min, -5*1e5, -vl_max]);
 C = IntersectPolyUnion(C,box);
-max_iter = 10;
+max_iter = 5;
 %%
 % reach
 rhoPre = 0;

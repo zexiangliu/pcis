@@ -1,6 +1,6 @@
 clc;clear all;close all;
-load AIState_ann_2.mat
-load driverState_ann_2.mat
+load AIState_cau4.mat
+load driverState_cau4.mat
 
 T_list = [state.time]';
 
@@ -12,17 +12,18 @@ vLead = intentionState.Data(:,3);
 
 u1 = state.Data(:,6);
 u2 = -state.Data(:,4);
-% sum(idx)
+sum(idx)
 u2(idx) = 0;
 X_list = [v_ex,y_e,h, vLead]';
 U_list = [u1,u2]';
 
 figure;
 plot(T_list,v_ex);
+figure
 hold on; plot(T_list,u1);
 
 figure;
 plot(T_list,y_e);
 hold on ;plot(T_list,u2);
 
-save traj1.mat
+save traj4.mat
