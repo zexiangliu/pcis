@@ -91,5 +91,7 @@ classdef PwDyn
             end
         end
         V = expand_conserv(varargin)
+        V = expand_rho(varargin)
+        V = pre_rho(varargin)
     end    
 end
