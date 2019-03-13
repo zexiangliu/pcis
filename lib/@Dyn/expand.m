@@ -1,17 +1,14 @@
-function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
-% win_always: compute set C ⊂ C0 such that
-%   
-%  C ⊂ Pre(C) + Ball(rho)
+function [Ct] = expand(dyn, C0, Safe, show_plot, verbose)
+% expand algorithm for Dyn: compute the maximum invariant set in C from C0.
+% input C0 must be a control invariant set (seed).
+%  
+%  Pre(C) ⊂ C
 % 
 % which is a sufficient condition for controlled invariance
 %
 % Reference: Rungger, M., & Tabuada, P. (2017). Computing Robust 
 % Controlled Invariant Sets of Linear Systems. IEEE Trans. on 
 % Automatic Control, dx.doi.org/10.1109/TAC.2017.2672859
-
-  if nargin < 3
-    rho = 0;
-  end
 
   if nargin < 4
     show_plot = 0;
@@ -20,12 +17,8 @@ function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
   if nargin < 5
     verbose = 0;
   end
-    
-  if nargin < 6
-      maxiter = inf;
-  end
-  
-  C = Polyhedron('A', zeros(1,dyn.nx), 'b', 1);
+
+  C = Polyhedron;
   Ct = C0;
   iter = 0;
 
@@ -35,16 +28,15 @@ function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
     figure; clf
   end
 
-  while not (shrink_rho(C,rho) <= Ct) && iter <= maxiter
+  while not (Ct <= C)
     C = Ct;
 
     if show_plot
-%       plot(C, 'alpha', 0.4); 
-      plot(C.projection([1,2,3]))
+      plot(C, 'alpha', 0.4); 
       drawnow
     end
 
-    Cpre = dyn.pre_rho(C, rho);
+    Cpre = dyn.pre(C, 0);
     if isEmptySet(Cpre)
       if verbose
         disp('returned empty')
@@ -53,7 +45,7 @@ function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
       break;
     end
 
-    Ct = intersect(Cpre, C0);
+    Ct = intersect(Cpre, Safe);
     Ct = minHRep(Ct);
 
     cc = Ct.chebyCenter;
@@ -69,17 +61,3 @@ function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
   if verbose && ~isEmptySet(Ct)
     disp(sprintf('finished with nonempty set after %d iterations!', iter))
   end
-end
-  
-function new_X = shrink_rho(X,rho)
-    A = X.A;
-    b = X.b;
-    
-    % way 1: absolute shrink
-    rho = sqrt(sum(A.^2,2))*rho;
-    b = b - rho;
-%     % way 2: relative shrink
-%     b = b - abs(b)*rho;
-    
-    new_X = Polyhedron('A',A,'b',b);
-end

@@ -1,4 +1,4 @@
-function [ X0,Xb ] = pre_rho(dyn, X, rho)
+function [ X0, Xb ] = pre_rho_rand(dyn, X, rho)
   % modified from pre_proj; aim to find a best way to enforce rho
   
   if ~isa(dyn, 'Dyn')
@@ -11,9 +11,19 @@ function [ X0,Xb ] = pre_rho(dyn, X, rho)
       return;
   end
   
-  Xb = shrink_rho(X,rho);
+%   Xb = shrink_rho(X,rho);
 %   Xb.minHRep; % not sure it is necessary or not. 
-  
+  Xb = Polyhedron;
+  hrep = inf;
+  for i = 1:5
+      tmp_Xb = shrink_rho(X,rho);
+      Xb.minHRep;
+      if hrep > size(tmp_Xb.H,1)
+          Xb = tmp_Xb;
+          hrep = size(Xb.H,1);
+      end
+  end
+
   X0_A = zeros(0, dyn.nx);
   X0_b = ones(0,1);
 
@@ -102,7 +112,8 @@ function new_X = shrink_rho(X,rho)
     
     % way 1: absolute shrink
     rho = sqrt(sum(A.^2,2))*rho;
-    b = b - rho;
+    mask = rand(length(b),1)>=0.8;
+    b = b - mask.*rho;
 %     % way 2: relative shrink
 %     b = b - abs(b)*rho;
     
