@@ -1,4 +1,4 @@
-function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
+function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter)
 % win_always: compute set C ⊂ C0 such that
 %   
 %  C ⊂ Pre(C) + Ball(rho)
@@ -10,7 +10,7 @@ function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
 % Automatic Control, dx.doi.org/10.1109/TAC.2017.2672859
 
   if nargin < 3
-    rho = 0;
+    rho_var = @(n) 0;
   end
 
   if nargin < 4
@@ -35,7 +35,9 @@ function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
     figure; clf
   end
 
-  while not (shrink_rho(C,rho) <= Ct) && iter <= maxiter
+  Xb= shrink_rho(C,rho_var(size(C.A,1)));
+  cc_old = inf;
+  while not (Xb <= Ct) && iter <= maxiter
     C = Ct;
 
     if show_plot
@@ -44,7 +46,8 @@ function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
       drawnow
     end
 
-    Cpre = dyn.pre_rho(C, rho);
+%     Cpre = dyn.pre_rho(C, rho_var(size(C.A,1)));
+    [Cpre,Xb] = dyn.pre_rho_rand(C, rho_var(size(C.A,1)));
     if isEmptySet(Cpre)
       if verbose
         disp('returned empty')
@@ -52,11 +55,22 @@ function [Ct] = win_always_rho(dyn, C0, rho, show_plot, verbose, maxiter)
       Ct = Cpre;
       break;
     end
+    
+    Ct = intersect(Cpre, C);
+%     Ct = minHRep(Ct);
+%     cc = Ct.chebyCenter;
 
-    Ct = intersect(Cpre, C0);
+%     if cc_old < cc.r
+%     if ~C.contains(Ct)
+%          % to guarantee the decreasing sequence
+%         Ct = intersect(Cpre, C);    
+% %         cc = Ct.chebyCenter;
+%     end
     Ct = minHRep(Ct);
 
     cc = Ct.chebyCenter;
+%     cc_old = cc.r;
+    
     time=toc;
 
     iter = iter+1;

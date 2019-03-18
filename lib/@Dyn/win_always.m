@@ -1,4 +1,4 @@
-function [Ct] = win_always(dyn, C0, rho, show_plot, verbose)
+function [Ct] = win_always(dyn, C0, rho, show_plot, verbose, maxiter)
 % win_always: compute set C ⊂ C0 such that
 %   
 %  C ⊂ Pre(C) + Ball(rho)
@@ -20,6 +20,10 @@ function [Ct] = win_always(dyn, C0, rho, show_plot, verbose)
   if nargin < 5
     verbose = 0;
   end
+  
+  if nargin < 6
+      maxiter = inf;
+  end
 
   if length(rho) == 1
     rho = rho * ones(dyn.nx,1);
@@ -38,11 +42,12 @@ function [Ct] = win_always(dyn, C0, rho, show_plot, verbose)
     figure; clf
   end
 
-  while not (C-rho_ball <= Ct)
+  while not (C-rho_ball <= Ct) && iter <= maxiter
     C = Ct;
 
     if show_plot
-      plot(C, 'alpha', 0.4); 
+%       plot(C, 'alpha', 0.4); 
+      plot(C.projection([1,2,3]))
       drawnow
     end
 
@@ -56,7 +61,7 @@ function [Ct] = win_always(dyn, C0, rho, show_plot, verbose)
     end
 
     Ct = intersect(Cpre, C0);
-    Ct = minHRep(Ct);
+%     Ct = minHRep(Ct);
 
     cc = Ct.chebyCenter;
     time=toc;

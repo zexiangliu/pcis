@@ -101,7 +101,7 @@ function [ X0 ] = pre_proj(dyn, X, rho)
                           'b', [Xd_b; dyn.XU.b]);
     
     proj{iter} = projection(pre_proj, 1:dyn.nx);
-    proj{iter}.minHRep;
+%     proj{iter}.minHRep;
   end
 
   X0 = Polyhedron('H', cell2mat(cellfun(@(p) p.H, proj, 'UniformOutput', false)));
