@@ -1,4 +1,4 @@
-function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter)
+function [Ct] = win_always_rho_inv(dyn, C0, rho_var, show_plot, verbose, maxiter)
 % win_always: compute set C ⊂ C0 such that
 %   
 %  C ⊂ Pre(C) + Ball(rho)
@@ -34,20 +34,25 @@ function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter
   if show_plot
     figure; clf
   end
-
-  Xb= shrink_rho(C,rho_var(size(C.A,1)));
+   
+  mask = ones(length(C.b),1);
+  Xb= shrink_rho(C,rho_var(size(C.A,1)),mask);
+%   Xb = shrink_rho2(C,rho_var(size(C.A,1)),mask);
   cc_old = inf;
   while not (Xb <= Ct) && iter <= maxiter
-    C = Ct;
-
     if show_plot
       plot(C, 'alpha', 0.4); 
 %       plot(C.projection([1,2,3]))
       drawnow
     end
-
-%     Cpre = dyn.pre_rho(C, rho_var(size(C.A,1)));
-    [Cpre,Xb] = dyn.pre_rho_rand(C, rho_var(size(C.A,1)));
+    
+    % figure out the stable constraints
+    mask = sum((abs(C.A*Ct.A') - abs(C.b-Ct.b')) >= 1-1e-10,1)' == 1;
+    mask = ~mask;
+    Xb = shrink_rho(Ct,rho_var(size(Ct.A,1)),mask);
+%     Xb = shrink_rho2(Ct,rho_var(size(Ct.A,1)),mask);
+    
+    [Cpre] = dyn.pre_pure(Xb);
     if isEmptySet(Cpre)
       if verbose
         disp('returned empty')
@@ -56,6 +61,7 @@ function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter
       break;
     end
     
+    C = Ct;
     Ct = intersect(Cpre, C);
 %     Ct = minHRep(Ct);
 %     cc = Ct.chebyCenter;
@@ -63,7 +69,7 @@ function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter
 %     if cc_old < cc.r
 %     if ~C.contains(Ct)
 %          % to guarantee the decreasing sequence
-%         Ct = intersect(Cpre, C);    
+%         Ct = intersect(Cpre, C);
 % %         cc = Ct.chebyCenter;
 %     end
     Ct = minHRep(Ct);
@@ -85,13 +91,55 @@ function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter
   end
 end
   
-function new_X = shrink_rho(X,rho)
+function new_X = shrink_rho(X,rho,mask)
     A = X.A;
     b = X.b;
     
     % way 1: absolute shrink
     rho = sqrt(sum(A.^2,2))*rho;
-    b = b - rho;
+    
+    idx = mask==1;
+    len = sum(idx);
+    mask(idx) = rand(len,1)>= 0.8;
+    b = b - mask.*rho;
+%     % way 2: relative shrink
+%     b = b - abs(b)*rho;
+    
+    new_X = Polyhedron('A',A,'b',b);
+end
+
+function new_X = shrink_rho2(X,rho,mask)
+    A = X.A;
+    b = X.b;
+    
+    cov1 = abs(A*A') > 1-0.01;
+    cov2 = abs(b-b') < 0.3;
+    
+    filter = cov1 & cov2;
+    row_rate = sum(filter,1);
+%     row_rate(~mask)= 0;
+    n = length(row_rate);
+    
+    check_list = false(n,1);
+    mask2 = check_list;
+    for i = 1:n
+        if ~mask(i) %|| check_list(i)
+            continue;
+        end
+        rate = row_rate(i);
+        group_rate = row_rate(filter(:,1));
+        if all(rate>=group_rate) && rate > 1
+            mask2(i) = 1;
+            check_list(filter(:,1))=true;
+        end
+    end
+    
+    rho = sqrt(sum(A.^2,2))*rho;
+    
+%     idx = mask2==1;
+%     len = sum(idx);
+%     mask2(idx) = rand(len,1)>= 0.8;
+    b = b - mask2.*rho;
 %     % way 2: relative shrink
 %     b = b - abs(b)*rho;
     
