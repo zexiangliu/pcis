@@ -21,8 +21,8 @@ function [con] = constants_tri()
 %   con.y_lane = 3.6; % lane width
   
   % assumptions
-  con.vL_min = 0;   % Lead car min velocity (m/s)
-  con.vL_max = 33.5;  % Lead car max velocity (m/s)
+  con.vL_min = 20;   % Lead car min velocity (m/s)
+  con.vL_max = 32;  % Lead car max velocity (m/s)
   con.aL_min = -3; % m/s^2
   con.aL_max = 3;  % m/s^2
   

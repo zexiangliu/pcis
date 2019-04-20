@@ -195,6 +195,6 @@ for t = 0:con.dt:time_horizon
     xA2 = [vEgoA2; yEgoA2; hA2; vLeadA2];
     M(counter) = getframe(fig);
     counter = counter + 1;
-    print(fig,['./pic/frame',num2str(counter-1)],'-dpng');
+%     print(fig,['./pic/frame',num2str(counter-1)],'-dpng');
 end
 

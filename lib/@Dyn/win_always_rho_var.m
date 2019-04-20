@@ -41,8 +41,8 @@ function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter
     C = Ct;
 
     if show_plot
-      plot(C, 'alpha', 0.4); 
-%       plot(C.projection([1,2,3]))
+%       plot(C, 'alpha', 0.4); 
+      plot(C.projection([1,2,3]))
       drawnow
     end
 
