@@ -1,4 +1,4 @@
-function [Ct] = expand(dyn, C0, Safe, show_plot, verbose)
+function [Ct] = expand(dyn, C0, Safe, show_plot, verbose, maxIter)
 % expand algorithm for Dyn: compute the maximum invariant set in C from C0.
 % input C0 must be a control invariant set (seed).
 %  
@@ -46,15 +46,19 @@ function [Ct] = expand(dyn, C0, Safe, show_plot, verbose)
     end
 
     Ct = intersect(Cpre, Safe);
-    Ct = minHRep(Ct);
+    Ct = minHRep2(Ct);
 
     cc = Ct.chebyCenter;
     time=toc;
 
     iter = iter+1;
+    
     if verbose
       disp(sprintf('iteration %d, %d ineqs, ball %f, time %f', ...
                  iter, size(Ct.A,1), cc.r, time));
+    end
+    if iter == maxIter
+        break;
     end
   end
 

@@ -51,25 +51,26 @@ max_iter = 5;
 %                 'LB', [con.v_min;   con.y_min;      con.h_min]);
 % % C1 = dyn1.win_always_rho_var(X1_lower,@rho_var,1,1);
 % C1 = dyn2.win_always_rho_var(X1,@rho_var,1,1);
-C1 = dyn2.win_always(X1,1e-6,1,1);
-% C2 = dyn2.win_always_rho_var(X2,@rho_var,1,1);
-% C3 = dyn2.win_always(X3,1e-6,1,1);
-C4 = dyn2.win_always_rho_var(X4,@rho_var,1,1);
+C1 = dyn2.win_always(X1,0,1,1);
+C2 = dyn2.win_always_rho_inv(X2,@rho_var,1,1);
 %%
-C = PolyUnion([C1 C4]);
-save seed_set.mat C
+% C3 = dyn2.win_always_rho_inv(X3,@rho_var,1,1);
+C4 = dyn2.win_always_rho_inv(X4,@rho_var,1,1);
+%%
+C = PolyUnion([C1,C2,C4]);
+% save seed_set.mat C
 %%
 rhoPre = 1e-6;
 dom = Polyhedron('UB',[5000, 5000, inf, inf],'LB', [-5000, -5000, -inf, -inf]);
 dyn = PwDyn(dom,{dom},{dyn2});
 CIS = expand(dyn, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
-% % reach
-% rhoPre = 0;
-% switch dyn_opt
-%     case 1
-%         CIS_ann = expand(dyn_a, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
-%     case 2
-%         CIS_cau = expand(dyn_c, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
-% end
+% reach
+rhoPre = 0;
+switch dyn_opt
+    case 1
+        CIS_ann = expand(dyn_a, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
+    case 2
+        CIS_cau = expand(dyn_c, S, C, rhoPre,'plot_stuff','debug','max_iter',max_iter);
+end
 
     

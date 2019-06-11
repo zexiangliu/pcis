@@ -1,4 +1,4 @@
-function [con] = constants_tri()
+function [con] = constants_tri_two_car()
   % Constants taken from the current TRI ACC model
 
   % sampling time

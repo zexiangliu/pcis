@@ -15,9 +15,9 @@ function [ X0, Xb ] = pre_rho_rand(dyn, X, rho)
 %   Xb.minHRep; % not sure it is necessary or not. 
   Xb = Polyhedron;
   hrep = inf;
-  for i = 1:5
+  for i = 1:1 %5
       tmp_Xb = shrink_rho(X,rho);
-      Xb.minHRep;
+      minHRep2(Xb);
       if hrep > size(tmp_Xb.H,1)
           Xb = tmp_Xb;
           hrep = size(Xb.H,1);
@@ -98,12 +98,12 @@ function [ X0, Xb ] = pre_rho_rand(dyn, X, rho)
     pre_proj = Polyhedron('A', [Xd_A; dyn.XU.A], ...
                           'b', [Xd_b; dyn.XU.b]);
     
-    proj{iter} = projection(pre_proj, 1:dyn.nx);
+    proj{iter} = projection2(pre_proj, 1:dyn.nx, 'vrep');
 %     proj{iter}.minHRep; % done within projection
   end
 
   X0 = Polyhedron('H', cell2mat(cellfun(@(p) p.H, proj, 'UniformOutput', false)));
-%   X0.minHRep;
+  minHRep2(X0);
 end
 
 function new_X = shrink_rho(X,rho)

@@ -9,7 +9,7 @@ step = length(override_list)-1;
         end
         t1 = T_list(ind1);
         t2 = T_list(ind2);
-        plot([t1,t2],U_list(ind1:ind2),'-g','linewidth',wl);hold on;
+        plot([t1,t2],U_list(ind1:ind2),'-','linewidth',wl,'color','g');hold on;
 %         plot([t1,t2],UMPC_list(i:i+1),'-r','linewidth',wl);
     end
 end

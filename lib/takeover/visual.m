@@ -1,4 +1,4 @@
-function visual(V,fig)
+ function visual(V,fig)
 if(nargin == 1)
     figure;
 else

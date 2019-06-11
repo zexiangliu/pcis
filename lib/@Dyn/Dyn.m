@@ -113,9 +113,11 @@ classdef Dyn
       assert(size(d.B, 1) == size(d.A,1))
       assert(size(d.Ew, 1) == size(d.A,1))
       assert(size(d.Ev, 1) == size(d.A,1))
-
-      assert(d.XU.Dim == size(d.A,2) + size(d.B,2))
-
+      
+      if ~isempty(d.B)
+          assert(d.XU.Dim == size(d.A,2) + size(d.B,2))
+      end
+      
       assert(length(d.Ap) == d.P.Dim)
       assert(length(d.Fp) == d.P.Dim)
       assert(length(d.Ad) == d.D.Dim)

@@ -24,7 +24,7 @@ function [ X0 ] = pre_proj(dyn, X, rho)
   end
   
   Xb = X - Polyhedron('A', [eye(dyn.nx); -eye(dyn.nx)], 'b', repmat(rho,2,1));
-  Xb.minHRep; % not sure it is necessary or not. 
+%   minHRep2(Xb); % not sure it is necessary or not. 
   
   X0_A = zeros(0, dyn.nx);
   X0_b = ones(0,1);
@@ -100,10 +100,13 @@ function [ X0 ] = pre_proj(dyn, X, rho)
     pre_proj = Polyhedron('A', [Xd_A; dyn.XU.A], ...
                           'b', [Xd_b; dyn.XU.b]);
     
-    proj{iter} = projection(pre_proj, 1:dyn.nx);
+%     proj{iter} = projection(pre_proj, 1:dyn.nx);
+    proj{iter} = projection2(pre_proj, 1:dyn.nx, 'mplp');
+%     proj{iter} = projection2(pre_proj, 1:dyn.nx);
 %     proj{iter}.minHRep;
   end
 
   X0 = Polyhedron('H', cell2mat(cellfun(@(p) p.H, proj, 'UniformOutput', false)));
-  X0.minHRep;
+  minHRep2(X0);
+%   X0.minHRep;
 end

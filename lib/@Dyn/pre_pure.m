@@ -88,10 +88,19 @@ function [ X0,Xb ] = pre_pure(dyn, X)
     pre_proj = Polyhedron('A', [Xd_A; dyn.XU.A], ...
                           'b', [Xd_b; dyn.XU.b]);
     
-    proj{iter} = projection(pre_proj, 1:dyn.nx);
+    proj{iter} = projection2(pre_proj, 1:dyn.nx);
 %     proj{iter}.minHRep; % done within projection
   end
 
   X0 = Polyhedron('H', cell2mat(cellfun(@(p) p.H, proj, 'UniformOutput', false)));
+  
+  X0 = minHRep2(X0);
+
+%   try
+%       X0 = minHRep2(X0);
+%   catch
+%       display("minHRep2 fails.");
+%       X0 = minHRep(X0);
+%   end
 %   X0.minHRep;
 end

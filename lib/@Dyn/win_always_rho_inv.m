@@ -1,4 +1,4 @@
-function [Ct] = win_always_rho_inv(dyn, C0, rho_var, show_plot, verbose, maxiter)
+function [Ct,log] = win_always_rho_inv(dyn, C0, rho_var, show_plot, verbose, maxiter)
 % win_always: compute set C ⊂ C0 such that
 %   
 %  C ⊂ Pre(C) + Ball(rho)
@@ -25,6 +25,13 @@ function [Ct] = win_always_rho_inv(dyn, C0, rho_var, show_plot, verbose, maxiter
       maxiter = inf;
   end
   
+  if nargout == 2
+    log = struct();
+    log.num_cons = [];
+    log.ball = [];
+    log.time = [];
+  end
+  
   C = Polyhedron('A', zeros(1,dyn.nx), 'b', 1);
   Ct = C0;
   iter = 0;
@@ -41,8 +48,8 @@ function [Ct] = win_always_rho_inv(dyn, C0, rho_var, show_plot, verbose, maxiter
   cc_old = inf;
   while not (Xb <= Ct) && iter <= maxiter
     if show_plot
-      plot(C, 'alpha', 0.4); 
-%       plot(C.projection([1,2,3]))
+%       plot(Ct, 'alpha', 0.4); 
+      plot(C.projection([1,2,3]))
       drawnow
     end
     
@@ -63,6 +70,8 @@ function [Ct] = win_always_rho_inv(dyn, C0, rho_var, show_plot, verbose, maxiter
     
     C = Ct;
     Ct = intersect(Cpre, C);
+%     Ct = intersect(Cpre, Xb);
+%     Ct = intersect(Cpre, C0);
 %     Ct = minHRep(Ct);
 %     cc = Ct.chebyCenter;
 
@@ -72,7 +81,8 @@ function [Ct] = win_always_rho_inv(dyn, C0, rho_var, show_plot, verbose, maxiter
 %         Ct = intersect(Cpre, C);
 % %         cc = Ct.chebyCenter;
 %     end
-    Ct = minHRep(Ct);
+    Ct = minHRep2(Ct);
+%     Ct = minHRep(Ct);
 
     cc = Ct.chebyCenter;
 %     cc_old = cc.r;
@@ -83,8 +93,27 @@ function [Ct] = win_always_rho_inv(dyn, C0, rho_var, show_plot, verbose, maxiter
     if verbose
       disp(sprintf('iteration %d, %d ineqs, ball %f, time %f', ...
                  iter, size(Ct.A,1), cc.r, time));
+             
+      if nargout == 2
+          log.ball(end+1) = cc.r;
+          log.num_cons(end+1) = size(Ct.A,1);
+          log.time(end+1) = time;
+      end
     end
   end
+  
+  % sanity check in case of numerical issues
+  Ct_pre = dyn.pre_pure(Ct);
+  
+  if ~(Ct <= Ct_pre)
+      disp("verification fails. output conservative result.");
+      Ct = Xb;
+      Ct_pre = dyn.pre_pure(Ct);
+      if ~(Ct <= Ct_pre)
+          disp("verification of conservative result fails. The output is not trustful.");
+      end
+  end
+  
 
   if verbose && ~isEmptySet(Ct)
     disp(sprintf('finished with nonempty set after %d iterations!', iter))

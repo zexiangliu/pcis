@@ -1,4 +1,4 @@
-function [Ct] = win_always(dyn, C0, rho, show_plot, verbose, maxiter)
+function [Ct,log] = win_always(dyn, C0, rho, show_plot, verbose, maxiter)
 % win_always: compute set C ⊂ C0 such that
 %   
 %  C ⊂ Pre(C) + Ball(rho)
@@ -25,10 +25,17 @@ function [Ct] = win_always(dyn, C0, rho, show_plot, verbose, maxiter)
       maxiter = inf;
   end
 
+  if nargout == 2
+      log = struct();
+      log.num_cons = [];
+      log.ball = [];
+      log.time = [];
+  end
+  
   if length(rho) == 1
     rho = rho * ones(dyn.nx,1);
   end
-
+    
   rho_ball = Polyhedron('A', [eye(dyn.nx); -eye(dyn.nx)], ...
                         'b', repmat(rho,2,1));
 
@@ -61,7 +68,7 @@ function [Ct] = win_always(dyn, C0, rho, show_plot, verbose, maxiter)
     end
 
     Ct = intersect(Cpre, C0);
-%     Ct = minHRep(Ct);
+%     Ct = minHRep2(Ct);
 
     cc = Ct.chebyCenter;
     time=toc;
@@ -70,9 +77,18 @@ function [Ct] = win_always(dyn, C0, rho, show_plot, verbose, maxiter)
     if verbose
       disp(sprintf('iteration %d, %d ineqs, ball %f, time %f', ...
                  iter, size(Ct.A,1), cc.r, time));
+      if nargout == 2
+          log.ball(end+1) = cc.r;
+          log.num_cons(end+1) = size(Ct.A,1);
+          log.time(end+1) = time;
+      end
     end
   end
 
+  
   if verbose && ~isEmptySet(Ct)
     disp(sprintf('finished with nonempty set after %d iterations!', iter))
+    
+    % not sure
+    Ct = C - rho_ball;
   end

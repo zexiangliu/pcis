@@ -1,12 +1,12 @@
 % plot the steering and throttle of the MPC controller over time
 % plot the safe input set over the MPC inputs
 clc;clear all;close all;
-filename = "exp2";
+filename = "exp8";
 load(filename);
 load CIS_bnd.mat
 load CIS_bnd_XU.mat
 load CIS_inv_R7.mat
-expr = exp2;
+expr = exp8;
 
 X_list = expr.X_list;
 U_list = expr.U_list;
@@ -81,35 +81,37 @@ save("graph"+filename);
 % clc;clear all;close all;
 % load graphexp1.mat
 % expr=exp2;
+load graphexp3.mat
+expr=exp3;
 t_detection = expr.t_detection;
 fig = figure('position',[100 100 840 300]);
 wl = 3.5;
 subplot(221)
 hold on;
 title = "throttle/bounded velocity inv set";
-ylabel = "$a_{e,x}$";
+ylabel = "$a_{e,x}~ (m/s^2)$";
 plot(T_list(1:sizU),U_list(1,:),'r-','linewidth',wl);
 plot_traj(ind1_list,U1_list1,U1_list2,T_list,title,ylabel);
-plot([t_detection,t_detection],[-3,3],'--g','linewidth',2)
+plot([t_detection,t_detection],[-3,3],'--c','linewidth',2)
 subplot(222)
 hold on;
 title = "steering/bounded velocity inv set";
-ylabel = "$v_{e,y}$";
+ylabel = "$v_{e,y}~ (m/s)$";
 plot(T_list(1:sizU),U_list(2,:),'r-','linewidth',wl);
 plot_traj(ind2_list,U2_list1,U2_list2,T_list,title,ylabel);
-plot([t_detection,t_detection],[-1.8,1.8],'--g','linewidth',2)
+plot([t_detection,t_detection],[-1.8,1.8],'--c','linewidth',2)
 subplot(223)
 hold on;
 title = "throttle/cautious driver inv set";
-ylabel = "$a_{e,x}$";
+ylabel = "$a_{e,x}~ (m/s^2)$";
 plot(T_list(1:sizU),U_list(1,:),'r-','linewidth',wl);
 plot_traj(ind3_list,U3_list1,U3_list2,T_list,title,ylabel);
-plot([t_detection,t_detection],[-3,3],'--g','linewidth',2)
+plot([t_detection,t_detection],[-3,3],'--c','linewidth',2)
 subplot(224)
 hold on;
 title = "steering/cautious driver inv set";
-ylabel = "$v_{e,y}$";
+ylabel = "$v_{e,y}~ (m/s)$";
 plot(T_list(1:sizU),U_list(2,:),'r-','linewidth',wl);
 plot_traj(ind4_list,U4_list1,U4_list2,T_list,title,ylabel)
-plot([t_detection,t_detection],[-1.8,1.8],'--g','linewidth',2)
+plot([t_detection,t_detection],[-1.8,1.8],'--c','linewidth',2)
 

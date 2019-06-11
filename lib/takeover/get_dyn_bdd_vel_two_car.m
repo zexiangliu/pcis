@@ -1,4 +1,4 @@
-function [ dyn0 ] = get_dyn_bdd_vel()
+function [ dyn0 ] = get_dyn_bdd_vel_two_car()
 % get_dyn_bdd_vel.m for two car scenario (one front car; one incoming car)
 
 %% Constants

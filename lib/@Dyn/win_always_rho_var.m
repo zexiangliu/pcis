@@ -1,4 +1,4 @@
-function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter)
+function [Ct,log] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter)
 % win_always: compute set C ⊂ C0 such that
 %   
 %  C ⊂ Pre(C) + Ball(rho)
@@ -23,6 +23,13 @@ function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter
     
   if nargin < 6
       maxiter = inf;
+  end
+  
+  if nargout == 2
+    log = struct();
+    log.num_cons = [];
+    log.ball = [];
+    log.time = [];
   end
   
   C = Polyhedron('A', zeros(1,dyn.nx), 'b', 1);
@@ -66,7 +73,7 @@ function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter
 %         Ct = intersect(Cpre, C);    
 % %         cc = Ct.chebyCenter;
 %     end
-    Ct = minHRep(Ct);
+    Ct = minHRep2(Ct);
 
     cc = Ct.chebyCenter;
 %     cc_old = cc.r;
@@ -77,6 +84,11 @@ function [Ct] = win_always_rho_var(dyn, C0, rho_var, show_plot, verbose, maxiter
     if verbose
       disp(sprintf('iteration %d, %d ineqs, ball %f, time %f', ...
                  iter, size(Ct.A,1), cc.r, time));
+      if nargout == 2
+          log.ball(end+1) = cc.r;
+          log.num_cons(end+1) = size(Ct.A,1);
+          log.time(end+1) = time;
+      end
     end
   end
 

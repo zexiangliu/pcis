@@ -66,17 +66,17 @@ wl = 3.5;
 subplot(121)
 hold on;
 title = "throttle/cautious driver inv set";
-ylabel = "$a_{e,x}$";
+ylabel = "$a_{e,x}~ (m/s^2)$";
 plot(T_list(1:sizU),U_list(1,:),'r-','linewidth',wl);
-plot_overriding(override_list, U_list(1,:),T_list)
 plot_traj(ind3_list,U3_list1,U3_list2,T_list,title,ylabel);
-plot([t_detection,t_detection],[-3,3],'--g','linewidth',2)
+plot_overriding(override_list, U_list(1,:),T_list)
+plot([t_detection,t_detection],[-3,3],'--c','linewidth',2)
 subplot(122)
 hold on;
 title = "steering/cautious driver inv set";
-ylabel = "$v_{e,y}$";
+ylabel = "$v_{e,y}~ (m/s)$";
 plot(T_list(1:sizU),U_list(2,:),'r-','linewidth',wl);
-plot_overriding(override_list, U_list(2,:),T_list)
 plot_traj(ind4_list,U4_list1,U4_list2,T_list,title,ylabel)
-plot([t_detection,t_detection],[-1.8,1.8],'--g','linewidth',2)
+plot_overriding(override_list, U_list(2,:),T_list)
+plot([t_detection,t_detection],[-1.8,1.8],'--c','linewidth',2)
 
