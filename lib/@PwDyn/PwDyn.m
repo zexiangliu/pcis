@@ -13,11 +13,51 @@ classdef PwDyn
     end
     
     methods
-        function pwd = PwDyn(domain, reg_list, dyn_list)
+        function pwd = PwDyn(varargin)
         % Constructor
+        %Description:
+        %   This is the constructor for the PwDyn object. (A Piece-wise linear dynamics object)
+        %
+        %Usage:
+        %   pwdyn = PwDyn(domain, reg_list, dyn_list)
+        %   pwdyn = PwDyn(domain, reg_list, dyn_list, 'NoPartitionCheck')
+        %   
+
+            %%%%%%%%%%%%%%%%%%%%%%
+            %% Input Processing %%
+            %%%%%%%%%%%%%%%%%%%%%%
+
+            domain = varargin{1};
+            reg_list = varargin{2};
+            dyn_list = varargin{3};
+
+            argidx = 4;
+
+            while nargin >= argidx
+                switch varargin{argidx}
+                    case 'NoPartitionCheck'
+                        NoPartitionCheck = true;
+                        argidx = argidx + 1;
+                    otherwise
+                        error('Unexpected input to PwDyn.')
+                end
+            end
+
             if size(reg_list) ~= size(dyn_list)
                 error('Number of domains and number of dynamics must agree')
             end
+
+            %%%%%%%%%%%%%%%%%%%%
+            %% Default Values %%
+            %%%%%%%%%%%%%%%%%%%%
+
+            if ~exist('NoPartitionCheck')
+                NoPartitionCheck = true;
+            end
+
+            %%%%%%%%%%%%%%%
+            %% Algorithm %%
+            %%%%%%%%%%%%%%%
 
             %Obtain the size of the system's various signals.
             pwd.n = size(dyn_list{1}.A,1);
@@ -36,7 +76,9 @@ classdef PwDyn
             pwd.dyn_list = dyn_list;
 
             %Check to see if the regions in the region list form a partition of the domain.
-            assert(is_this_a_partition(pwd));
+            if ~NoPartitionCheck
+                assert(is_this_a_partition(pwd));
+            end
         end
 
         function dyn = get_region_dyn(pwd, point)

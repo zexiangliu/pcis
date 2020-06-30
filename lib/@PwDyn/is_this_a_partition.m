@@ -1,4 +1,4 @@
-function [ is_partition ] = is_this_a_partition( dyn )
+function [ is_partition ] = is_this_a_partition( varargin )
 	%is_this_a_partition.m
 	%
 	%Inputs:
@@ -7,7 +7,10 @@ function [ is_partition ] = is_this_a_partition( dyn )
 	%	
 	%	reg_set - The collection of sets that we want to test to see
 	%			  if it partitions D.
-	%			
+	%	
+	%Usage:
+	%	tf = is_this_a_partition( pwdyn )
+	%	tf = pwdyn.is_this_a_partition()		
 	%
 	%Assumptions:
 	%	
@@ -17,10 +20,23 @@ function [ is_partition ] = is_this_a_partition( dyn )
 	%				   Boolean
 	%
 
+	%%%%%%%%%%%%%%%%%%%%%%
+	%% Input Processing %%
+	%%%%%%%%%%%%%%%%%%%%%%
 
-	%% Constants
-    D = dyn.domain;
-    reg_set = dyn.reg_list;
+	pwdyn = varargin{1};
+
+	%%%%%%%%%%%%%%%
+	%% Constants %%
+	%%%%%%%%%%%%%%%
+
+    D = pwdyn.domain;
+    reg_set = pwdyn.reg_list;
+
+    %%%%%%%%%%%%%%%
+    %% Algorithm %%
+    %%%%%%%%%%%%%%%
+
 	%% Check to See if every element of reg_set is "Disjoint"
 	all_are_disjoint = true;
 	for reg_ind = 1:(length(reg_set)-1)
@@ -57,7 +73,9 @@ function [ is_partition ] = is_this_a_partition( dyn )
 		warning('reg_set is not a subset of D.')
 	end
 
-	is_partition = all(all_are_disjoint) && all(reg_set_contains_D) && all(D_contains_reg_set);
+	%% Create Output %%
 
+	is_partition = all(all_are_disjoint) && all(reg_set_contains_D) && all(D_contains_reg_set);
+	
 end
 

@@ -8,7 +8,8 @@
 %% Constants %%
 clear;close all;clc;
 
-X = Polyhedron('lb',[-5 -5],'ub',[5;5]);
+domain_bound = 5;
+X = Polyhedron('lb',-domain_bound*ones(1,2),'ub',domain_bound*ones(1,2));
 
 obst1 = Polyhedron('lb',[0;0],'ub',[2,2]);
 obst2 = Polyhedron('lb',[-2 -1],'ub',[-1 1]);
@@ -25,7 +26,7 @@ plot(S)
 
 %Create Dynamics for each region in S.
 n = 2; m = 2;
-XU = Polyhedron('lb',[-inf(1,n) -ones(1,m)],'ub',[inf(1,n) ones(1,m)]);
+XU = Polyhedron('lb',[-domain_bound*ones(1,n) -ones(1,m)],'ub',[domain_bound*ones(1,n) ones(1,m)]);
 D = Polyhedron('lb',[0],'ub',[1] );
 
 d1 = Dyn(eye(n),zeros(n,1),eye(n), XU, ...
@@ -76,7 +77,7 @@ C = S(6);
 
 % reach
 rhoPre = 1e-6;
-Xr = expand(pwd0, S2, C, rhoPre,'debug');
+Xr = expand(pwd0, S2, C, rhoPre,'debug','max_iter',100);
 
 figure;
 hold on;
